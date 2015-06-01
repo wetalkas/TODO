@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">KeepSolid</string>
+
+
+    <string name="action_settings">Settings</string>
+    <string name="action_create_new_database">Clear All</string>
+
+    <string name="title_activity_manual">ManualActivity</string>
+    <string name="title_activity_authorisation">AuthorisationActivity</string>
+
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="retry_password">Retry Password</string>
+    <string name="log_in">Log In</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="title_activity_registration">RegistrationActivity</string>
+    <string name="title_activity_scroll">ScrollActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_splash">SplashActivity</string>
+
+
+    <string name="task_name">Title</string>
+    <string name="task_description">Description</string>
+    <string name="task_status">Done</string>
+    <string name="task_date">Date</string>
+    <string name="task_time">Time</string>
+    <string name="task_priority">Priority</string>
+</resources>
