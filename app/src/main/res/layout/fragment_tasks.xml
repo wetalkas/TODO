@@ -11,7 +11,6 @@
         layout="@layout/toolbar">
     </include>
 
-
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -21,7 +20,7 @@
         android:layout_below="@+id/toolbar"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:paddingTop="16dp"
+        android:paddingTop="10dp"
         android:clipToPadding="false"/>
 
     <com.melnykov.fab.FloatingActionButton
@@ -34,7 +33,7 @@
         fab:fab_colorNormal="@color/colorPrimary"
         fab:fab_colorPressed="#4DB6AC"
         fab:fab_colorRipple="#4DB6AC"
-        android:layout_margin="16dp"
+        android:layout_margin="20dp"
         android:src="@drawable/ic_plus_white_24dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"

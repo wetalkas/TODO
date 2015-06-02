@@ -1,4 +1,4 @@
-package com.keepsolid.wetalkas.keepsolid;
+package com.keepsolid.wetalkas.keepsolid.todo_sdk;
 
 /**
  * Created by wetalkas on 31.05.15.

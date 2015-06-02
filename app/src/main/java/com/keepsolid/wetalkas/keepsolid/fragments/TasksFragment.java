@@ -1,47 +1,41 @@
-package com.keepsolid.wetalkas.keepsolid.activities;
+package com.keepsolid.wetalkas.keepsolid.fragments;
 
-import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.Resources;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.v4.widget.AutoScrollHelper;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.app.Fragment;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.SearchView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.TimePicker;
 
-
-import com.keepsolid.wetalkas.keepsolid.Constants;
-import com.keepsolid.wetalkas.keepsolid.sdk.CustomPreferenceManager;
+import com.keepsolid.wetalkas.keepsolid.todo_sdk.Constants;
 import com.keepsolid.wetalkas.keepsolid.R;
+import com.keepsolid.wetalkas.keepsolid.todo_sdk.adapter.TaskAdapter;
+import com.keepsolid.wetalkas.keepsolid.todo_sdk.model.TaskModel;
+import com.keepsolid.wetalkas.keepsolid.sdk.CustomPreferenceManager;
 import com.keepsolid.wetalkas.keepsolid.sdk.SQLiteHelperCustom;
-import com.keepsolid.wetalkas.keepsolid.sdk.Sdk;
+import com.keepsolid.wetalkas.keepsolid.services.TaskReminderService;
 import com.melnykov.fab.FloatingActionButton;
 
 import java.text.SimpleDateFormat;
@@ -49,12 +43,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
-
-public class ScrollActivity extends ActionBarActivity {
 
 
+public class TasksFragment extends Fragment {
 
     TaskAdapter taskAdapter;
 
@@ -73,42 +64,27 @@ public class ScrollActivity extends ActionBarActivity {
 
     CustomPreferenceManager preferenceManager;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_scroll);
 
-        CustomPreferenceManager.getInstance().init(getApplicationContext(), "");
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        //Inflate the layout for this fragment
+
+        View rootView = inflater.inflate(R.layout.fragment_tasks, container, false);
+
+        CustomPreferenceManager.getInstance().init(getActivity().getApplicationContext(), "");
 
 
         calendar = Calendar.getInstance();
 
+        setUI(rootView);
 
-        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
-        if (toolbar != null) {
-
-            Log.d("toolbar", "not null");
-
-            //toolbar.setPopupTheme();
-
-            toolbar.setTitle("TODO");
-            toolbar.setTitleTextColor(getResources().getColor(R.color.secondary_text_default_material_light));
-
-
-
-            setSupportActionBar(toolbar);
-
-        }
-
-        setUI();
-
-
-        sqLiteHelperCustom = new SQLiteHelperCustom(this, "mydatabase.db", null, 1);
+        sqLiteHelperCustom = new SQLiteHelperCustom(getActivity(), "mydatabase.db", null, 1);
 
         sqLiteDatabase = sqLiteHelperCustom.getWritableDatabase();
 
 
-        taskAdapter = new TaskAdapter(ScrollActivity.this);
+        taskAdapter = new TaskAdapter(getActivity());
 
         lvTasks.setAdapter(taskAdapter);
 
@@ -120,81 +96,38 @@ public class ScrollActivity extends ActionBarActivity {
 
         preferenceManager = CustomPreferenceManager.getInstance();
 
-        List<TaskItem> tasks = restoreTasks();
-
-
-
-        taskAdapter.addItem(tasks);
-
+        List<TaskModel> tasks = restoreTasks();
+        taskAdapter.addTask(tasks);
         taskAdapter.notifyDataSetChanged();
 
-
-
-        //CustomPreferenceManager
-
-
-
-
-
-
+        return rootView;
     }
 
 
 
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_scroll, menu);
 
+    private void setUI(View rootView) {
+        lvTasks = (ListView) rootView.findViewById(R.id.lvTasks);
 
-
-
-
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-
-        if (id == R.id.action_create_new_database) {
-            sqLiteHelperCustom.onUpgrade(sqLiteDatabase, Integer.valueOf(SQLiteHelperCustom.DATABASE_VERSION),
-                    Integer.valueOf(SQLiteHelperCustom.DATABASE_VERSION) + 1);
-
-            taskAdapter.deleteAll();
-            taskAdapter.notifyDataSetChanged();
-        }
-
-
-        return super.onOptionsItemSelected(item);
-    }
-
-
-
-    private void setUI() {
-        lvTasks = (ListView)findViewById(R.id.lvTasks);
-
-        fab = (FloatingActionButton)findViewById(R.id.fab);
+        fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addTaskDialog(ScrollActivity.this);
+                addTaskDialog(getActivity());
             }
         });
 
-        searchView = (SearchView) findViewById(R.id.searchView);
+        Toolbar toolbar = (Toolbar)rootView.findViewById(R.id.toolbar);
+        if (toolbar != null) {
+            Log.d("toolbar", "not null");
+            toolbar.setTitle("TODO");
+            toolbar.setTitleTextColor(getResources().getColor(R.color.secondary_text_default_material_light));
+            ((ActionBarActivity)getActivity()).setSupportActionBar(toolbar);
+        }
 
+        searchView = (SearchView) rootView.findViewById(R.id.searchView);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -204,31 +137,18 @@ public class ScrollActivity extends ActionBarActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                List<TaskItem> tasks;
-
-
-                Log.d("onQueryTextChanged", "newText = " + newText);
-
+                List<TaskModel> tasks;
 
                 if (newText.equals("")) {
-
-
-
-
                     taskAdapter.deleteAll();
-
                     tasks = restoreTasks();
 
-
                 } else {
-
                     taskAdapter.deleteAll();
-
                     tasks = findTasks(newText);
-
                 }
 
-                taskAdapter.addItem(tasks);
+                taskAdapter.addTask(tasks);
                 taskAdapter.notifyDataSetChanged();
 
                 return false;
@@ -241,53 +161,38 @@ public class ScrollActivity extends ActionBarActivity {
 
 
 
-
-
-
     private void addTaskDialog(Context context) {
         final AlertDialog.Builder alert = new AlertDialog.Builder(context);
 
         alert.setTitle("Adding task");
 
-        ScrollView container = (ScrollView) getLayoutInflater().inflate(R.layout.dialog_add_new_task, null);
+        ScrollView container = (ScrollView) getActivity().getLayoutInflater().inflate(R.layout.dialog_add_new_task, null);
 
         final EditText etTitle = (EditText) container.findViewById(R.id.etDialogAddTaskName);
         final EditText etDescription = (EditText) container.findViewById(R.id.etDialogAddTaskDescription);
         final EditText etDate = (EditText) container.findViewById(R.id.etDialogAddTaskDate);
         final EditText etTime = (EditText) container.findViewById(R.id.etDialogAddTaskTime);
-
         final Spinner spPriority = (Spinner) container.findViewById(R.id.spDialogAddTaskPriority);
-
-
-
-
 
         etDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDatePickerDialog(ScrollActivity.this, etDate);
-
-
+                showDatePickerDialog(getActivity(), etDate);
             }
         });
-
 
         etTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showTimePickerDialog(ScrollActivity.this, etTime);
+                showTimePickerDialog(getActivity(), etTime);
             }
         });
 
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item,
                 Constants.PRIORITY_LEVELS);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-
-
         spPriority.setAdapter(adapter);
-
 
         spPriority.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -301,19 +206,12 @@ public class ScrollActivity extends ActionBarActivity {
             }
         });
 
-
-
-
-
-
         alert.setView(container);
 
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy HH:mm");
-
-
 
                 String date = etDate.getText().toString();
                 String time = etTime.getText().toString();
@@ -322,16 +220,33 @@ public class ScrollActivity extends ActionBarActivity {
 
                 Date dateFull = new Date();
 
+                if (!dateFullString.equals(" ")) {
+                    try {
 
-                try {
+                        dateFull = dateFormat.parse(dateFullString);
 
-                    dateFull = dateFormat.parse(dateFullString);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
-                TaskItem taskItem = new TaskItem(etTitle.getText().toString(), etDescription.getText().toString(),
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(dateFull.getTime());
+
+                Intent intent = new Intent(getActivity(),
+                        TaskReminderService.class);
+
+                PendingIntent pendingIntent = PendingIntent.getService(getActivity(), 0,
+                        intent, 0);
+
+
+                AlarmManager manager = (AlarmManager)getActivity().getSystemService(
+                        Context.ALARM_SERVICE);
+
+
+                manager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+
+                TaskModel taskItem = new TaskModel(etTitle.getText().toString(), etDescription.getText().toString(),
                         dateFull.getTime(), false, new Date().getTime());
                 addTask(taskItem);
 
@@ -346,9 +261,7 @@ public class ScrollActivity extends ActionBarActivity {
         });
 
         alert.show();
-
     }
-
 
 
 
@@ -398,16 +311,13 @@ public class ScrollActivity extends ActionBarActivity {
 
 
 
+    private void addTask(TaskModel taskItem) {
 
-
-    private void addTask(TaskItem taskItem) {
-
-
-        List<TaskItem> list = new ArrayList<>();
+        List<TaskModel> list = new ArrayList<>();
 
         list.add(taskItem);
 
-        taskAdapter.addItem(list);
+        taskAdapter.addTask(list);
 
         ContentValues newValues = new ContentValues();
         // Задайте значения для каждой строки.
@@ -430,22 +340,14 @@ public class ScrollActivity extends ActionBarActivity {
 
 
 
-    public List<TaskItem> restoreTasks() {
-        List<TaskItem> tasks = new ArrayList<>();
+    public List<TaskModel> restoreTasks() {
+        List<TaskModel> tasks = new ArrayList<>();
 
         Cursor c = sqLiteDatabase.query("tasks", null, null, null, null, null, null);
 
-
-
-        // ставим позицию курсора на первую строку выборки
-        // если в выборке нет строк, вернется false
         if (c.moveToFirst()) {
 
-            // определяем номера столбцов по имени в выборке
-
-
             do {
-                // получаем значения по номерам столбцов и пишем все в лог
 
                 String taskName = c.getString(c.getColumnIndex(SQLiteHelperCustom.TASK_NAME_COLUMN));
                 String taskDescr = c.getString(c.getColumnIndex(SQLiteHelperCustom.TASK_DESCRIPTION_COLUMN));
@@ -453,18 +355,10 @@ public class ScrollActivity extends ActionBarActivity {
                 boolean taskStatus = Boolean.getBoolean(c.getString(c.getColumnIndex(SQLiteHelperCustom.TASK_STATUS_COLUMN)));
                 long timeStamp = c.getLong(c.getColumnIndex(SQLiteHelperCustom.TASK_TIME_COLUMN));
 
-                TaskItem item = new TaskItem(taskName, taskDescr, taskDate, taskStatus, timeStamp);
-
+                TaskModel item = new TaskModel(taskName, taskDescr, taskDate, taskStatus, timeStamp);
 
                 tasks.add(item);
-
-
-
-
-                // переход на следующую строку
-                // а если следующей нет (текущая - последняя), то false - выходим из цикла
             } while (c.moveToNext());
-
 
         } else
             Log.d("DataBase", "0 rows");
@@ -482,21 +376,9 @@ public class ScrollActivity extends ActionBarActivity {
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
-            //TaskItem item = taskAdapter.getItem(position);
-
-
-
             Log.d("long", "click");
 
-            removeTaskDialog(ScrollActivity.this, position);
-
-
-
-
-
-
-
-
+            removeTaskDialog(getActivity(), position);
 
             return false;
         }
@@ -509,11 +391,6 @@ public class ScrollActivity extends ActionBarActivity {
         final AlertDialog.Builder alert = new AlertDialog.Builder(context);
 
         alert.setTitle("Remove task");
-
-
-
-
-
 
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
@@ -528,10 +405,6 @@ public class ScrollActivity extends ActionBarActivity {
                 taskAdapter.notifyDataSetChanged();
 
                 Log.d("deleting tasks from db", "count = " + count);
-
-
-
-
             }
         });
 
@@ -549,30 +422,22 @@ public class ScrollActivity extends ActionBarActivity {
 
 
 
+    public List<TaskModel> findTasks(String key) {
+        List<TaskModel> tasks = new ArrayList<>();
 
-    public List<TaskItem> findTasks(String key) {
-        List<TaskItem> tasks = new ArrayList<>();
 
+        String[] columns = new String[] { SQLiteHelperCustom.TASK_NAME_COLUMN };
 
-        String[] columns = new String[] { key };
-
-        String selection = "task_name = ?";
-        String[] selectionArgs = new String[] { key };
+        String selection = SQLiteHelperCustom.TASK_NAME_COLUMN + " LIKE ?";
+        String[] selectionArgs = new String[] {"%" + key + "%"};
 
 
         Cursor c = sqLiteDatabase.query("tasks", null, selection, selectionArgs, null, null, null);
 
 
-
-        // ставим позицию курсора на первую строку выборки
-        // если в выборке нет строк, вернется false
         if (c.moveToFirst()) {
 
-            // определяем номера столбцов по имени в выборке
-
-
             do {
-                // получаем значения по номерам столбцов и пишем все в лог
 
                 String taskName = c.getString(c.getColumnIndex(SQLiteHelperCustom.TASK_NAME_COLUMN));
                 String taskDescr = c.getString(c.getColumnIndex(SQLiteHelperCustom.TASK_DESCRIPTION_COLUMN));
@@ -580,18 +445,11 @@ public class ScrollActivity extends ActionBarActivity {
                 boolean taskStatus = Boolean.getBoolean(c.getString(c.getColumnIndex(SQLiteHelperCustom.TASK_STATUS_COLUMN)));
                 long timeStamp = c.getLong(c.getColumnIndex(SQLiteHelperCustom.TASK_TIME_COLUMN));
 
-                TaskItem item = new TaskItem(taskName, taskDescr, taskDate, taskStatus, timeStamp);
+                TaskModel item = new TaskModel(taskName, taskDescr, taskDate, taskStatus, timeStamp);
 
 
                 tasks.add(item);
 
-                Log.d("what", "");
-
-
-
-
-                // переход на следующую строку
-                // а если следующей нет (текущая - последняя), то false - выходим из цикла
             } while (c.moveToNext());
 
 
@@ -599,145 +457,15 @@ public class ScrollActivity extends ActionBarActivity {
             Log.d("DataBase", "0 rows");
         c.close();
 
-
-        Log.d("query", key);
-
-
-
-
-
-
         return tasks;
     }
 
 
+    public void deleteAllTasksFromDataBase() {
+        sqLiteHelperCustom.onUpgrade(sqLiteDatabase, Integer.valueOf(SQLiteHelperCustom.DATABASE_VERSION),
+                Integer.valueOf(SQLiteHelperCustom.DATABASE_VERSION) + 1);
 
-
-
-
-
-
-
-    public class TaskAdapter extends ArrayAdapter<TaskItem> {
-
-        private List<TaskItem> tasks = new ArrayList<>();
-
-        public TaskAdapter(Context context) {
-            super(context, R.layout.element_list_view);
-        }
-
-
-
-        @Override
-        public int getCount() {
-            return tasks.size();
-        }
-
-        public void addItem(List<TaskItem> data) {
-            this.tasks.addAll(data);
-        }
-
-        public List<TaskItem> getAllTasks() {
-            return  tasks;
-        }
-
-        public TaskItem getTask(int position) {
-            return tasks.get(position);
-
-        }
-
-        public void deleteAll() {
-            this.tasks = new ArrayList<TaskItem>();;
-        }
-
-        public void deleteItem(int position) {
-            this.tasks.remove(position);
-        }
-
-
-
-        @Override
-        public int getPosition(TaskItem item) {
-            return tasks.indexOf(item);
-        }
-
-
-        @Override
-        public TaskItem getItem(int position) {
-            return tasks.get(position);
-        }
-
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder viewHolder;
-
-            if(convertView == null) {
-                // inflate the GridView item layout
-                LayoutInflater inflater = LayoutInflater.from(getContext());
-                convertView = inflater.inflate(R.layout.element_list_view, parent, false);
-
-
-                // initialize the view holder
-                viewHolder = new ViewHolder();
-                viewHolder.tvTaskName = (TextView) convertView.findViewById(R.id.tvTaskName);
-                viewHolder.tvTaskDate = (TextView) convertView.findViewById(R.id.tvTaskDate);
-                viewHolder.tvTaskDescription = (TextView) convertView.findViewById(R.id.tvTaskDescription);
-                viewHolder.cbTaskDone = (CheckBox) convertView.findViewById(R.id.cbTaskDone);
-
-                convertView.setTag(viewHolder);
-            } else {
-                // recycle the already inflated view
-                viewHolder = (ViewHolder) convertView.getTag();
-            }
-
-            // update the item view
-            TaskItem item = tasks.get(position);
-
-
-
-            viewHolder.tvTaskName.setText(item.name);
-            viewHolder.tvTaskDate.setText(Sdk.getDateWithCurrentLocale(item.date, ScrollActivity.this));
-            viewHolder.tvTaskDescription.setText(item.description);
-            viewHolder.cbTaskDone.setChecked(item.done);
-
-
-            return convertView;
-        }
-
+        taskAdapter.deleteAll();
+        taskAdapter.notifyDataSetChanged();
     }
-
-    private static class ViewHolder {
-        TextView tvTaskName;
-        TextView tvTaskDate;
-        TextView tvTaskDescription;
-        CheckBox cbTaskDone;
-    }
-
-
-
-
-    public class TaskItem {
-        public final String name;
-        public final long date;
-        public final String description;
-        public final boolean done;
-        public final long timeStamp;
-
-
-
-        public TaskItem(String name, String description, long date, boolean done, long timeStamp) {
-            this.name = name;
-            this.date = date;
-            this.description = description;
-            this.done = done;
-            this.timeStamp = timeStamp;
-
-        }
-    }
-
-    public TaskItem getNewTask(String name, long date, String description) {
-        return /*new TaskItem(name, date, description, false)*/null;
-    }
-
 }
