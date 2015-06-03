@@ -7,7 +7,7 @@ import android.provider.BaseColumns;
 import android.util.Log;
 
 
-public class SQLiteHelperCustom extends SQLiteOpenHelper {
+public class CustomSQLiteHelper extends SQLiteOpenHelper {
 
 
     public static final String DATABASE_VERSION = "2";
@@ -37,7 +37,7 @@ public class SQLiteHelperCustom extends SQLiteOpenHelper {
 
 
 
-    public SQLiteHelperCustom(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+    public CustomSQLiteHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
 
 

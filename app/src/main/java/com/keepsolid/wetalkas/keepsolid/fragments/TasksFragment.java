@@ -15,12 +15,16 @@ import android.os.Bundle;
 import android.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -28,13 +32,15 @@ import android.widget.ScrollView;
 import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
+import com.keepsolid.wetalkas.keepsolid.activities.MainActivity;
 import com.keepsolid.wetalkas.keepsolid.todo_sdk.Constants;
 import com.keepsolid.wetalkas.keepsolid.R;
 import com.keepsolid.wetalkas.keepsolid.todo_sdk.adapter.TaskAdapter;
 import com.keepsolid.wetalkas.keepsolid.todo_sdk.model.TaskModel;
 import com.keepsolid.wetalkas.keepsolid.sdk.CustomPreferenceManager;
-import com.keepsolid.wetalkas.keepsolid.sdk.SQLiteHelperCustom;
+import com.keepsolid.wetalkas.keepsolid.sdk.CustomSQLiteHelper;
 import com.keepsolid.wetalkas.keepsolid.services.TaskReminderService;
 import com.melnykov.fab.FloatingActionButton;
 
@@ -58,8 +64,10 @@ public class TasksFragment extends Fragment {
     SearchView searchView;
 
 
-    SQLiteHelperCustom sqLiteHelperCustom;
+    CustomSQLiteHelper customSQLiteHelper;
     SQLiteDatabase sqLiteDatabase;
+
+    MainActivity activity;
 
 
     CustomPreferenceManager preferenceManager;
@@ -74,14 +82,18 @@ public class TasksFragment extends Fragment {
 
         CustomPreferenceManager.getInstance().init(getActivity().getApplicationContext(), "");
 
+        if (getActivity() != null) {
+            activity = (MainActivity)getActivity();
+        }
+
 
         calendar = Calendar.getInstance();
 
         setUI(rootView);
 
-        sqLiteHelperCustom = new SQLiteHelperCustom(getActivity(), "mydatabase.db", null, 1);
+        customSQLiteHelper = new CustomSQLiteHelper(getActivity(), "mydatabase.db", null, 1);
 
-        sqLiteDatabase = sqLiteHelperCustom.getWritableDatabase();
+        sqLiteDatabase = customSQLiteHelper.getWritableDatabase();
 
 
         taskAdapter = new TaskAdapter(getActivity());
@@ -164,6 +176,7 @@ public class TasksFragment extends Fragment {
     private void addTaskDialog(Context context) {
         final AlertDialog.Builder alert = new AlertDialog.Builder(context);
 
+
         alert.setTitle("Adding task");
 
         ScrollView container = (ScrollView) getActivity().getLayoutInflater().inflate(R.layout.dialog_add_new_task, null);
@@ -173,6 +186,11 @@ public class TasksFragment extends Fragment {
         final EditText etDate = (EditText) container.findViewById(R.id.etDialogAddTaskDate);
         final EditText etTime = (EditText) container.findViewById(R.id.etDialogAddTaskTime);
         final Spinner spPriority = (Spinner) container.findViewById(R.id.spDialogAddTaskPriority);
+
+
+
+
+
 
         etDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -206,11 +224,19 @@ public class TasksFragment extends Fragment {
             }
         });
 
+
+
+
         alert.setView(container);
+
+
+
+
 
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+
                 SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy HH:mm");
 
                 String date = etDate.getText().toString();
@@ -219,6 +245,7 @@ public class TasksFragment extends Fragment {
                 String dateFullString = date + " " + time;
 
                 Date dateFull = new Date();
+
 
                 if (!dateFullString.equals(" ")) {
                     try {
@@ -230,6 +257,7 @@ public class TasksFragment extends Fragment {
                     }
                 }
 
+
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(dateFull.getTime());
 
@@ -240,7 +268,7 @@ public class TasksFragment extends Fragment {
                         intent, 0);
 
 
-                AlarmManager manager = (AlarmManager)getActivity().getSystemService(
+                AlarmManager manager = (AlarmManager) getActivity().getSystemService(
                         Context.ALARM_SERVICE);
 
 
@@ -250,7 +278,10 @@ public class TasksFragment extends Fragment {
                         dateFull.getTime(), false, new Date().getTime());
                 addTask(taskItem);
 
+
             }
+
+
         });
 
         alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -260,10 +291,39 @@ public class TasksFragment extends Fragment {
             }
         });
 
-        alert.show();
+
+        final AlertDialog alertDialog = alert.show();
+
+
+        final Button positiveButoon = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+
+        positiveButoon.setEnabled(false);
+
+
+
+        etTitle.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if (s.length() < 1) {
+                    positiveButoon.setEnabled(false);
+                } else {
+                    positiveButoon.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!positiveButoon.isEnabled()) {
+                    Toast.makeText(activity, "Title can not be empty.", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
-
-
 
 
     public long showDatePickerDialog(Context context, final EditText etDate) {
@@ -305,6 +365,8 @@ public class TasksFragment extends Fragment {
                 calendar.get(Calendar.MINUTE), true);
         timePickerDialog.show();
 
+
+
         return calendar.getTimeInMillis();
     }
 
@@ -321,13 +383,13 @@ public class TasksFragment extends Fragment {
 
         ContentValues newValues = new ContentValues();
         // Задайте значения для каждой строки.
-        newValues.put(SQLiteHelperCustom.TASK_NAME_COLUMN, taskItem.name);
-        newValues.put(SQLiteHelperCustom.TASK_DESCRIPTION_COLUMN, taskItem.description);
-        newValues.put(SQLiteHelperCustom.TASK_DATE_COLUMN, taskItem.date);
-        newValues.put(SQLiteHelperCustom.TASK_STATUS_COLUMN, taskItem.done);
-        newValues.put(SQLiteHelperCustom.TASK_PRIORITY_COLUMN, "pr");
+        newValues.put(CustomSQLiteHelper.TASK_NAME_COLUMN, taskItem.name);
+        newValues.put(CustomSQLiteHelper.TASK_DESCRIPTION_COLUMN, taskItem.description);
+        newValues.put(CustomSQLiteHelper.TASK_DATE_COLUMN, taskItem.date);
+        newValues.put(CustomSQLiteHelper.TASK_STATUS_COLUMN, taskItem.done);
+        newValues.put(CustomSQLiteHelper.TASK_PRIORITY_COLUMN, "pr");
 
-        newValues.put(SQLiteHelperCustom.TASK_TIME_COLUMN, taskItem.timeStamp);
+        newValues.put(CustomSQLiteHelper.TASK_TIME_COLUMN, taskItem.timeStamp);
         // Вставляем данные в базу
         long rowID = sqLiteDatabase.insert("tasks", null, newValues);
 
@@ -349,11 +411,11 @@ public class TasksFragment extends Fragment {
 
             do {
 
-                String taskName = c.getString(c.getColumnIndex(SQLiteHelperCustom.TASK_NAME_COLUMN));
-                String taskDescr = c.getString(c.getColumnIndex(SQLiteHelperCustom.TASK_DESCRIPTION_COLUMN));
-                long taskDate = c.getLong(c.getColumnIndex(SQLiteHelperCustom.TASK_DATE_COLUMN));
-                boolean taskStatus = Boolean.getBoolean(c.getString(c.getColumnIndex(SQLiteHelperCustom.TASK_STATUS_COLUMN)));
-                long timeStamp = c.getLong(c.getColumnIndex(SQLiteHelperCustom.TASK_TIME_COLUMN));
+                String taskName = c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_NAME_COLUMN));
+                String taskDescr = c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_DESCRIPTION_COLUMN));
+                long taskDate = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_DATE_COLUMN));
+                boolean taskStatus = Boolean.getBoolean(c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_STATUS_COLUMN)));
+                long timeStamp = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_TIME_COLUMN));
 
                 TaskModel item = new TaskModel(taskName, taskDescr, taskDate, taskStatus, timeStamp);
 
@@ -398,7 +460,7 @@ public class TasksFragment extends Fragment {
 
 
 
-                long count = sqLiteDatabase.delete("tasks", SQLiteHelperCustom.TASK_TIME_COLUMN
+                long count = sqLiteDatabase.delete("tasks", CustomSQLiteHelper.TASK_TIME_COLUMN
                         + " = " + taskAdapter.getItem(position).timeStamp, null);
 
                 taskAdapter.deleteItem(position);
@@ -426,9 +488,9 @@ public class TasksFragment extends Fragment {
         List<TaskModel> tasks = new ArrayList<>();
 
 
-        String[] columns = new String[] { SQLiteHelperCustom.TASK_NAME_COLUMN };
+        String[] columns = new String[] { CustomSQLiteHelper.TASK_NAME_COLUMN };
 
-        String selection = SQLiteHelperCustom.TASK_NAME_COLUMN + " LIKE ?";
+        String selection = CustomSQLiteHelper.TASK_NAME_COLUMN + " LIKE ?";
         String[] selectionArgs = new String[] {"%" + key + "%"};
 
 
@@ -439,11 +501,11 @@ public class TasksFragment extends Fragment {
 
             do {
 
-                String taskName = c.getString(c.getColumnIndex(SQLiteHelperCustom.TASK_NAME_COLUMN));
-                String taskDescr = c.getString(c.getColumnIndex(SQLiteHelperCustom.TASK_DESCRIPTION_COLUMN));
-                long taskDate = c.getLong(c.getColumnIndex(SQLiteHelperCustom.TASK_DATE_COLUMN));
-                boolean taskStatus = Boolean.getBoolean(c.getString(c.getColumnIndex(SQLiteHelperCustom.TASK_STATUS_COLUMN)));
-                long timeStamp = c.getLong(c.getColumnIndex(SQLiteHelperCustom.TASK_TIME_COLUMN));
+                String taskName = c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_NAME_COLUMN));
+                String taskDescr = c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_DESCRIPTION_COLUMN));
+                long taskDate = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_DATE_COLUMN));
+                boolean taskStatus = Boolean.getBoolean(c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_STATUS_COLUMN)));
+                long timeStamp = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_TIME_COLUMN));
 
                 TaskModel item = new TaskModel(taskName, taskDescr, taskDate, taskStatus, timeStamp);
 
@@ -462,8 +524,8 @@ public class TasksFragment extends Fragment {
 
 
     public void deleteAllTasksFromDataBase() {
-        sqLiteHelperCustom.onUpgrade(sqLiteDatabase, Integer.valueOf(SQLiteHelperCustom.DATABASE_VERSION),
-                Integer.valueOf(SQLiteHelperCustom.DATABASE_VERSION) + 1);
+        customSQLiteHelper.onUpgrade(sqLiteDatabase, Integer.valueOf(CustomSQLiteHelper.DATABASE_VERSION),
+                Integer.valueOf(CustomSQLiteHelper.DATABASE_VERSION) + 1);
 
         taskAdapter.deleteAll();
         taskAdapter.notifyDataSetChanged();

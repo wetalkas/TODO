@@ -127,7 +127,7 @@ public class AuthorisationFragment extends Fragment {
 
             RegistrationFragment registrationFragment = new RegistrationFragment();
 
-            customFragmentManager.setFragment(R.id.container, registrationFragment);
+            customFragmentManager.setFragment(R.id.container, registrationFragment, true);
 
 
 

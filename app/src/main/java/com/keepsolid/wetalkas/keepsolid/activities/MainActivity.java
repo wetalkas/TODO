@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.keepsolid.wetalkas.keepsolid.fragments.AuthorisationFragment;
+import com.keepsolid.wetalkas.keepsolid.fragments.SplashFragment;
 import com.keepsolid.wetalkas.keepsolid.fragments.TasksFragment;
 import com.keepsolid.wetalkas.keepsolid.sdk.CustomFragmentManager;
 import com.keepsolid.wetalkas.keepsolid.sdk.CustomPreferenceManager;
@@ -18,10 +19,10 @@ public class MainActivity extends ActionBarActivity {
 
 
 
-    CustomFragmentManager customFragmentManager;
+    private CustomFragmentManager customFragmentManager;
+    private TasksFragment tasksFragment;
 
-
-    TasksFragment tasksFragment;
+    private SplashFragment splashFragment;
 
 
     @Override
@@ -31,6 +32,10 @@ public class MainActivity extends ActionBarActivity {
 
         tasksFragment = new TasksFragment();
 
+        splashFragment = new SplashFragment();
+
+
+
         AuthorisationFragment authorisationFragment = new AuthorisationFragment();
 
         CustomPreferenceManager.getInstance().init(getApplicationContext(), "");
@@ -39,9 +44,13 @@ public class MainActivity extends ActionBarActivity {
 
         customFragmentManager = CustomFragmentManager.getInstance();
 
-        customFragmentManager.setFragment(R.id.container, tasksFragment);
+        customFragmentManager.setFragment(R.id.container, splashFragment, true);
+
 
     }
+
+
+
 
 
     @Override
@@ -84,5 +93,10 @@ public class MainActivity extends ActionBarActivity {
         }
 
 
+    }
+
+
+    public TasksFragment getTasksFragment() {
+        return tasksFragment;
     }
 }

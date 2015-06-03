@@ -11,37 +11,16 @@
             android:name=".activities.MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" >
-        </activity>
-        <activity
-            android:name=".activities.ManualActivity"
-            android:label="@string/title_activity_manual" >
-        </activity>
-        <activity
-            android:name=".activities.AuthorisationActivity"
-            android:label="@string/title_activity_authorisation" >
-        </activity>
-        <activity
-            android:name=".activities.RegistrationActivity"
-            android:label="@string/title_activity_registration" >
-        </activity>
-        <activity
-            android:name=".activities.ScrollActivity"
-            android:label="@string/title_activity_scroll" >
-        </activity>
-        <activity
-            android:name=".activities.SplashActivity"
-            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <service
             android:name=".services.TaskReminderService"
             android:enabled="true"
-            android:exported="true" >
+            android:exported="true">
         </service>
     </application>
 

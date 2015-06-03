@@ -41,15 +41,16 @@ public class CustomFragmentManager {
     }
 
 
-    public void setFragment(int containerViewId, Fragment fragment) {
+    public void setFragment(int containerViewId, Fragment fragment, boolean addToBackStack) {
 
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(containerViewId, fragment);
-        fragmentTransaction.addToBackStack(null);
+
+        if (addToBackStack) {
+            fragmentTransaction.addToBackStack(null);
+        }
 
         fragmentTransaction.commit();
-
-
     }
 
 
