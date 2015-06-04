@@ -6,6 +6,11 @@
     <color name="white">#FFFFFF</color>
     <color name="black">#454545</color>
 
+    <color name="priority_very_high">#c3d10006</color>
+    <color name="priority_high">#c3d16100</color>
+    <color name="priority_normal">#c3d1ce00</color>
+    <color name="priority_low">#c34bc200</color>
+
 
 
 

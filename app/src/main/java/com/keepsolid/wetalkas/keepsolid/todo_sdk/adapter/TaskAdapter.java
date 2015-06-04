@@ -6,9 +6,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.keepsolid.wetalkas.keepsolid.R;
+import com.keepsolid.wetalkas.keepsolid.todo_sdk.Constants;
 import com.keepsolid.wetalkas.keepsolid.todo_sdk.model.TaskModel;
 import com.keepsolid.wetalkas.keepsolid.sdk.Sdk;
 
@@ -86,8 +88,9 @@ public class TaskAdapter extends ArrayAdapter<TaskModel> {
             // initialize the view holder
             viewHolder = new ViewHolder();
             viewHolder.tvTaskName = (TextView) convertView.findViewById(R.id.tvTaskName);
-            viewHolder.tvTaskDate = (TextView) convertView.findViewById(R.id.tvTaskDate);
             viewHolder.tvTaskDescription = (TextView) convertView.findViewById(R.id.tvTaskDescription);
+            viewHolder.tvTaskDate = (TextView) convertView.findViewById(R.id.tvTaskDate);
+            viewHolder.ivTaksPriority = (ImageView) convertView.findViewById(R.id.ivTaskPriority);
             viewHolder.cbTaskDone = (CheckBox) convertView.findViewById(R.id.cbTaskDone);
 
             convertView.setTag(viewHolder);
@@ -102,8 +105,9 @@ public class TaskAdapter extends ArrayAdapter<TaskModel> {
 
 
         viewHolder.tvTaskName.setText(item.name);
-        viewHolder.tvTaskDate.setText(Sdk.getDateWithCurrentLocale(item.date, context));
         viewHolder.tvTaskDescription.setText(item.description);
+        viewHolder.tvTaskDate.setText(Sdk.getDateWithCurrentLocale(item.date, context));
+        viewHolder.ivTaksPriority.setBackgroundColor(context.getResources().getColor(Constants.PRIORITY_COLORS[(int) item.priority]));
         viewHolder.cbTaskDone.setChecked(item.done);
 
 
@@ -113,8 +117,9 @@ public class TaskAdapter extends ArrayAdapter<TaskModel> {
 
     private static class ViewHolder {
         TextView tvTaskName;
-        TextView tvTaskDate;
         TextView tvTaskDescription;
+        TextView tvTaskDate;
+        ImageView ivTaksPriority;
         CheckBox cbTaskDone;
     }
 

@@ -64,7 +64,7 @@
             android:layout_marginBottom="10dp" />
 
         <TextView
-            android:layout_width="250dp"
+            android:layout_width="230dp"
             android:layout_height="32dp"
             android:text="@string/task_date"
             android:id="@+id/tvTaskDate"
@@ -75,6 +75,14 @@
             android:layout_margin="10dp"
             android:gravity="left|center_vertical" />
 
+        <ImageView
+            android:layout_width="10dp"
+            android:layout_height="25dp"
+            android:id="@+id/ivTaskPriority"
+            android:layout_marginTop="3dp"
+            android:layout_alignTop="@+id/cbTaskDone"
+            android:layout_toLeftOf="@+id/cbTaskDone"
+            android:layout_toStartOf="@+id/cbTaskDone" />
 
 
     </RelativeLayout>
