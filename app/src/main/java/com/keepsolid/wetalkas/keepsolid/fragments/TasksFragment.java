@@ -108,7 +108,7 @@ public class TasksFragment extends Fragment {
 
         preferenceManager = CustomPreferenceManager.getInstance();
 
-        List<TaskModel> tasks = restoreTasks();
+        List<TaskModel> tasks = restoreTasks(null);
         taskAdapter.addTask(tasks);
         taskAdapter.notifyDataSetChanged();
 
@@ -153,7 +153,7 @@ public class TasksFragment extends Fragment {
 
                 if (newText.equals("")) {
                     taskAdapter.deleteAll();
-                    tasks = restoreTasks();
+                    tasks = restoreTasks(null);
 
                 } else {
                     taskAdapter.deleteAll();
@@ -371,6 +371,81 @@ public class TasksFragment extends Fragment {
     }
 
 
+    public void showSortingDialog(Context context) {
+        Log.d("TaskFragment", "sorting");
+
+
+
+
+        final AlertDialog.Builder alert = new AlertDialog.Builder(context);
+
+
+        alert.setTitle("Sorting by:");
+
+
+        alert.setItems(Constants.SORTING_BY, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                List<TaskModel> tasks = new ArrayList<TaskModel>();
+                switch (which) {
+                    case 0:
+                        taskAdapter.deleteAll();
+                        tasks = restoreTasks(CustomSQLiteHelper.TASK_DATE_COLUMN);
+                        break;
+                    case 1:
+                        taskAdapter.deleteAll();
+                        tasks = restoreTasks(CustomSQLiteHelper.TASK_NAME_COLUMN);
+                        break;
+
+                    case 2:
+                        taskAdapter.deleteAll();
+                        tasks = restoreTasks(CustomSQLiteHelper.TASK_PRIORITY_COLUMN);
+                        break;
+                }
+
+                if (!tasks.isEmpty()) {
+                    taskAdapter.addTask(tasks);
+                    taskAdapter.notifyDataSetChanged();
+                }
+
+            }
+        });
+
+
+
+
+
+
+
+
+
+        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+
+            }
+
+
+        });
+
+        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+
+        final AlertDialog alertDialog = alert.show();
+
+
+
+
+    }
+
+
 
 
     private void addTask(TaskModel taskItem) {
@@ -402,10 +477,10 @@ public class TasksFragment extends Fragment {
 
 
 
-    public List<TaskModel> restoreTasks() {
+    public List<TaskModel> restoreTasks(String orderBy) {
         List<TaskModel> tasks = new ArrayList<>();
 
-        Cursor c = sqLiteDatabase.query("tasks", null, null, null, null, null, null);
+        Cursor c = sqLiteDatabase.query("tasks", null, null, null, null, null, orderBy);
 
         if (c.moveToFirst()) {
 

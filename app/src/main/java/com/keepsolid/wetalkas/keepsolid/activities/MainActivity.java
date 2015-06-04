@@ -69,15 +69,20 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
 
-        if (id == R.id.action_create_new_database) {
-            tasksFragment.deleteAllTasksFromDataBase();
-        }
+        switch (id) {
+            //noinspection SimplifiableIfStatement
+            case R.id.action_settings:
+                return true;
 
+            case R.id.action_create_new_database:
+                tasksFragment.deleteAllTasksFromDataBase();
+                break;
+
+            case R.id.action_sorting:
+                tasksFragment.showSortingDialog(this);
+                break;
+        }
         return super.onOptionsItemSelected(item);
     }
 
