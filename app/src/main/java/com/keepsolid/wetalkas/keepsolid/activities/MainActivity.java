@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.keepsolid.wetalkas.keepsolid.fragments.AuthorisationFragment;
+import com.keepsolid.wetalkas.keepsolid.fragments.SettingsFragment;
 import com.keepsolid.wetalkas.keepsolid.fragments.SplashFragment;
 import com.keepsolid.wetalkas.keepsolid.fragments.TasksFragment;
 import com.keepsolid.wetalkas.keepsolid.sdk.CustomFragmentManager;
@@ -73,6 +74,8 @@ public class MainActivity extends ActionBarActivity {
         switch (id) {
             //noinspection SimplifiableIfStatement
             case R.id.action_settings:
+                SettingsFragment settingsFragment = new SettingsFragment();
+                customFragmentManager.setFragment(R.id.container, settingsFragment, true);
                 return true;
 
             case R.id.action_create_new_database:

@@ -32,7 +32,7 @@ public class CustomSQLiteHelper extends SQLiteOpenHelper {
             + " integer primary key autoincrement, " + TASK_NAME_COLUMN
             + " text not null, " + TASK_DESCRIPTION_COLUMN + " text not null, " + TASK_DATE_COLUMN
             + " long, " + TASK_TIME_COLUMN + " long, " + TASK_STATUS_COLUMN
-            + " boolean, " + TASK_PRIORITY_COLUMN + " text not null);";
+            + " boolean, " + TASK_PRIORITY_COLUMN + " long);";
 
 
 

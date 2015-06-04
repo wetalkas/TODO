@@ -5,27 +5,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.keepsolid.wetalkas.keepsolid.R;
-import com.keepsolid.wetalkas.keepsolid.todo_sdk.model.TaskModel;
-import com.keepsolid.wetalkas.keepsolid.sdk.Sdk;
+import com.keepsolid.wetalkas.keepsolid.todo_sdk.model.SettingModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
-
-
-public class TaskAdapter extends ArrayAdapter<TaskModel> {
-
+/**
+ * Created by wetalkas on 04.06.15.
+ */
+public class SettingsAdapter extends ArrayAdapter<SettingModel> {
     private Context context;
 
-    private List<TaskModel> tasks = new ArrayList<>();
+    private List<SettingModel> settings = new ArrayList<>();
 
 
-    public TaskAdapter(Context context) {
+    public SettingsAdapter(Context context) {
         super(context, R.layout.model_task);
         this.context = context;
     }
@@ -33,43 +31,43 @@ public class TaskAdapter extends ArrayAdapter<TaskModel> {
 
     @Override
     public int getCount() {
-        return tasks.size();
+        return settings.size();
     }
 
-    public TaskModel getTask(int position) {
-        return tasks.get(position);
+    public SettingModel getTask(int position) {
+        return settings.get(position);
 
     }
 
-    public List<TaskModel> getAllTasks() {
-        return  tasks;
+    public List<SettingModel> getAllTasks() {
+        return settings;
     }
 
-    public void addTask(List<TaskModel> tasks) {
-        this.tasks.addAll(tasks);
+    public void addTask(List<SettingModel> settings) {
+        this.settings.addAll(settings);
     }
 
 
 
     public void deleteAll() {
-        this.tasks = new ArrayList<TaskModel>();;
+        this.settings = new ArrayList<SettingModel>();;
     }
 
     public void deleteItem(int position) {
-        this.tasks.remove(position);
+        this.settings.remove(position);
     }
 
 
 
     @Override
-    public int getPosition(TaskModel item) {
-        return tasks.indexOf(item);
+    public int getPosition(SettingModel item) {
+        return settings.indexOf(item);
     }
 
 
     @Override
-    public TaskModel getItem(int position) {
-        return tasks.get(position);
+    public SettingModel getItem(int position) {
+        return settings.get(position);
     }
 
 
@@ -85,11 +83,8 @@ public class TaskAdapter extends ArrayAdapter<TaskModel> {
 
             // initialize the view holder
             viewHolder = new ViewHolder();
-            viewHolder.tvTaskName = (TextView) convertView.findViewById(R.id.tvTaskName);
-            viewHolder.tvTaskDate = (TextView) convertView.findViewById(R.id.tvTaskDate);
+            viewHolder.tvSettingName = (TextView) convertView.findViewById(R.id.tvTaskName);
             viewHolder.tvTaskDescription = (TextView) convertView.findViewById(R.id.tvTaskDescription);
-            viewHolder.cbTaskDone = (CheckBox) convertView.findViewById(R.id.cbTaskDone);
-
             convertView.setTag(viewHolder);
         } else {
             // recycle the already inflated view
@@ -97,14 +92,12 @@ public class TaskAdapter extends ArrayAdapter<TaskModel> {
         }
 
         // update the item view
-        TaskModel item = tasks.get(position);
+        SettingModel item = settings.get(position);
 
 
 
-        viewHolder.tvTaskName.setText(item.name);
-        viewHolder.tvTaskDate.setText(Sdk.getDateWithCurrentLocale(item.date, context));
+        viewHolder.tvSettingName.setText(item.name);
         viewHolder.tvTaskDescription.setText(item.description);
-        viewHolder.cbTaskDone.setChecked(item.done);
 
 
         return convertView;
@@ -112,15 +105,9 @@ public class TaskAdapter extends ArrayAdapter<TaskModel> {
 
 
     private static class ViewHolder {
-        TextView tvTaskName;
-        TextView tvTaskDate;
+        TextView tvSettingName;
         TextView tvTaskDescription;
-        CheckBox cbTaskDone;
+        RelativeLayout container;
     }
 
 }
-
-
-
-
-

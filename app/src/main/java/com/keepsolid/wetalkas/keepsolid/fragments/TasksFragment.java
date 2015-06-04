@@ -187,6 +187,8 @@ public class TasksFragment extends Fragment {
         final EditText etTime = (EditText) container.findViewById(R.id.etDialogAddTaskTime);
         final Spinner spPriority = (Spinner) container.findViewById(R.id.spDialogAddTaskPriority);
 
+        final long[] priority = {0};
+
 
 
 
@@ -215,6 +217,21 @@ public class TasksFragment extends Fragment {
         spPriority.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                switch (position) {
+                    case 0:
+                        priority[0] = 3;
+                        break;
+                    case 1:
+                        priority[0] = 2;
+                        break;
+                    case 2:
+                        priority[0] = 1;
+                        break;
+                    case 3:
+                        priority[0] = 0;
+                        break;
+                }
 
             }
 
@@ -275,7 +292,7 @@ public class TasksFragment extends Fragment {
                 manager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
 
                 TaskModel taskItem = new TaskModel(etTitle.getText().toString(), etDescription.getText().toString(),
-                        dateFull.getTime(), false, new Date().getTime());
+                        dateFull.getTime(), priority[0], false, new Date().getTime());
                 addTask(taskItem);
 
 
@@ -412,37 +429,7 @@ public class TasksFragment extends Fragment {
             }
         });
 
-
-
-
-
-
-
-
-
-        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-
-            }
-
-
-        });
-
-        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-
         final AlertDialog alertDialog = alert.show();
-
-
-
-
     }
 
 
@@ -462,7 +449,7 @@ public class TasksFragment extends Fragment {
         newValues.put(CustomSQLiteHelper.TASK_DESCRIPTION_COLUMN, taskItem.description);
         newValues.put(CustomSQLiteHelper.TASK_DATE_COLUMN, taskItem.date);
         newValues.put(CustomSQLiteHelper.TASK_STATUS_COLUMN, taskItem.done);
-        newValues.put(CustomSQLiteHelper.TASK_PRIORITY_COLUMN, "pr");
+        newValues.put(CustomSQLiteHelper.TASK_PRIORITY_COLUMN, taskItem.priority);
 
         newValues.put(CustomSQLiteHelper.TASK_TIME_COLUMN, taskItem.timeStamp);
         // Вставляем данные в базу
@@ -489,10 +476,11 @@ public class TasksFragment extends Fragment {
                 String taskName = c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_NAME_COLUMN));
                 String taskDescr = c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_DESCRIPTION_COLUMN));
                 long taskDate = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_DATE_COLUMN));
+                long priority = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_PRIORITY_COLUMN));
                 boolean taskStatus = Boolean.getBoolean(c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_STATUS_COLUMN)));
                 long timeStamp = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_TIME_COLUMN));
 
-                TaskModel item = new TaskModel(taskName, taskDescr, taskDate, taskStatus, timeStamp);
+                TaskModel item = new TaskModel(taskName, taskDescr, taskDate, priority, taskStatus, timeStamp);
 
                 tasks.add(item);
             } while (c.moveToNext());
@@ -579,10 +567,11 @@ public class TasksFragment extends Fragment {
                 String taskName = c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_NAME_COLUMN));
                 String taskDescr = c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_DESCRIPTION_COLUMN));
                 long taskDate = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_DATE_COLUMN));
+                long taskPriority = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_PRIORITY_COLUMN));
                 boolean taskStatus = Boolean.getBoolean(c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_STATUS_COLUMN)));
                 long timeStamp = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_TIME_COLUMN));
 
-                TaskModel item = new TaskModel(taskName, taskDescr, taskDate, taskStatus, timeStamp);
+                TaskModel item = new TaskModel(taskName, taskDescr, taskDate, taskPriority, taskStatus, timeStamp);
 
 
                 tasks.add(item);
