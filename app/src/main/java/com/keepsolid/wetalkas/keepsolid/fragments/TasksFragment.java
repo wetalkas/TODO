@@ -135,8 +135,10 @@ public class TasksFragment extends Fragment {
         if (toolbar != null) {
             Log.d("toolbar", "not null");
             toolbar.setTitle("TODO");
-            toolbar.setTitleTextColor(getResources().getColor(R.color.secondary_text_default_material_light));
+            toolbar.setTitleTextColor(getResources().getColor(R.color.abc_primary_text_material_dark));
             ((ActionBarActivity)getActivity()).setSupportActionBar(toolbar);
+
+            //toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_dots_vertical_white_24dp));
         }
 
         searchView = (SearchView) rootView.findViewById(R.id.searchView);

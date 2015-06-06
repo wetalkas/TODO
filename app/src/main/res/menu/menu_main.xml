@@ -10,5 +10,6 @@
 
 
     <item android:id="@+id/action_sorting" android:title="@string/menu_sorting"
-        android:orderInCategory="100" app:showAsAction="never" />
+        android:orderInCategory="100" android:icon="@drawable/ic_sort_by_alpha_white_24dp"
+        app:showAsAction="ifRoom" />
 </menu>

@@ -5,10 +5,32 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+
+        <item name="android:actionOverflowButtonStyle">@style/MyActionButtonOverflow</item>
+
+
+        <item name="android:itemTextAppearance">@android:color/primary_text_dark</item>
+
     </style>
 
 
-    <style name="ActionBarTheme" parent="Theme.AppCompat.NoActionBar"></style>
+    <style name="AppTheme.ActionMenu" parent="Theme.AppCompat.NoActionBar"></style>
+
+
+    <style name="MyActionButtonOverflow" parent="android:style/Widget.Holo.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_dots_vertical_white_24dp</item>
+    </style>
+
+
+    <style name="MyCustomSearchViewTheme"> parent="android:style/Widget.Holo.ActionButton.Overflow">
+        <item name="android:actionOverflowButtonStyle">@style/MyActionButtonOverflow</item>
+
+    </style>
+
+    <style name="MySearchViewOverflow" parent="android:style/Widget.Holo.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_dots_vertical_white_24dp</item>
+    </style>
+
 
 
 
