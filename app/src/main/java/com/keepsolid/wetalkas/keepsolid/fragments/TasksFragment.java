@@ -13,6 +13,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -183,13 +184,32 @@ public class TasksFragment extends Fragment {
 
         ScrollView container = (ScrollView) getActivity().getLayoutInflater().inflate(R.layout.dialog_add_new_task, null);
 
-        final EditText etTitle = (EditText) container.findViewById(R.id.etDialogAddTaskName);
-        final EditText etDescription = (EditText) container.findViewById(R.id.etDialogAddTaskDescription);
-        final EditText etDate = (EditText) container.findViewById(R.id.etDialogAddTaskDate);
-        final EditText etTime = (EditText) container.findViewById(R.id.etDialogAddTaskTime);
+        final TextInputLayout tilTitle = (TextInputLayout) container.findViewById(R.id.tilDialogAddTaskName);
+        final EditText etTitle = tilTitle.getEditText();
+
+        final TextInputLayout tilDescription = (TextInputLayout) container.findViewById(R.id.tilDialogAddTaskDescription);
+        final EditText etDescription = tilDescription.getEditText();
+
+        final TextInputLayout tilDate = (TextInputLayout) container.findViewById(R.id.tilDialogAddTaskDate);
+        final EditText etDate = tilDate.getEditText();
+
+        final TextInputLayout tilTime = (TextInputLayout) container.findViewById(R.id.tilDialogAddTaskTime);
+        final EditText etTime = tilTime.getEditText();
+
         final Spinner spPriority = (Spinner) container.findViewById(R.id.spDialogAddTaskPriority);
 
         final long[] priority = {0};
+
+
+
+        tilTitle.setHint("Title");
+        tilDescription.setHint("Description");
+        tilDate.setHint("Date");
+        tilTime.setHint("Time");
+
+
+
+
 
 
 
@@ -330,6 +350,7 @@ public class TasksFragment extends Fragment {
 
                 if (s.length() < 1) {
                     positiveButoon.setEnabled(false);
+
                 } else {
                     positiveButoon.setEnabled(true);
                 }
@@ -338,7 +359,9 @@ public class TasksFragment extends Fragment {
             @Override
             public void afterTextChanged(Editable s) {
                 if (!positiveButoon.isEnabled()) {
-                    Toast.makeText(activity, "Title can not be empty.", Toast.LENGTH_LONG).show();
+                    tilTitle.setError("Can not be empty.");
+                } else {
+                    tilTitle.setErrorEnabled(false);
                 }
             }
         });
