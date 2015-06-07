@@ -13,21 +13,10 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.BitmapFactory;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.ScrollView;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
+
 
 import com.keepsolid.wetalkas.keepsolid.R;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 
 public class TaskReminderService extends Service {
     @Override
@@ -47,7 +36,7 @@ public class TaskReminderService extends Service {
 
         //Toast.makeText(this, "Напоминание", Toast.LENGTH_LONG).show();
 
-        notifyTask();
+        notifyTask(intent);
 
 
 
@@ -75,7 +64,7 @@ public class TaskReminderService extends Service {
 
 
 
-    private void notifyTask() {
+    private void notifyTask(Intent intent) {
 
 
         Context context = getApplicationContext();
@@ -85,24 +74,29 @@ public class TaskReminderService extends Service {
                 0, notificationIntent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
 
+
         Resources res = context.getResources();
         Notification.Builder builder = new Notification.Builder(context);
 
         builder.setContentIntent(contentIntent)
-                .setSmallIcon(R.drawable.ic_plus_white_18dp)
+                .setSmallIcon(R.drawable.ic_clock_white_24dp)
                         // большая картинка
-                .setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.ic_plus_white_48dp))
+                //.setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.ic_clock_white_36dp))
                         //.setTicker(res.getString(R.string.warning)) // текст в строке состояния
                 .setTicker("Последнее китайское предупреждение!")
                 .setWhen(System.currentTimeMillis())
                 .setAutoCancel(true)
                         //.setContentTitle(res.getString(R.string.notifytitle)) // Заголовок уведомления
-                .setContentTitle("Напоминание")
+                .setContentTitle("Reminder")
                         //.setContentText(res.getString(R.string.notifytext))
-                .setContentText("Пора покормить кота"); // Текст уведомленимя
+                .setContentText(intent.getStringExtra("task_title")); // Текст уведомленимя
+
+
 
         // Notification notification = builder.getNotification(); // до API 16
         Notification notification = builder.build();
+
+        notification.defaults = Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE;
 
         NotificationManager notificationManager = (NotificationManager) context
                 .getSystemService(Context.NOTIFICATION_SERVICE);

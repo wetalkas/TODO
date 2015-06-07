@@ -1,41 +1,43 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fab="http://schemas.android.com/apk/res-auto"
-
-
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E0E0E0">
+    android:background="@color/gray_50">
+
+
+
+
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/lvTasks"
+        android:longClickable="true"
+        android:layout_below="@+id/toolbar"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:paddingBottom="88dp"
+        android:clipToPadding="false"/>
+
+
 
     <include
         android:id="@+id/toolbar"
         layout="@layout/toolbar">
     </include>
 
-    <ListView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/lvTasks"
-
-        android:longClickable="true"
-        android:layout_below="@+id/toolbar"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:paddingTop="10dp"
-        android:clipToPadding="false"/>
-
-    <com.melnykov.fab.FloatingActionButton
-        android:id="@+id/fab"
-
+    <android.support.design.widget.FloatingActionButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
 
-        android:layout_gravity="bottom|right"
-        fab:fab_colorNormal="@color/colorPrimary"
-        fab:fab_colorPressed="#4DB6AC"
-        fab:fab_colorRipple="#4DB6AC"
-        android:layout_margin="20dp"
         android:src="@drawable/ic_plus_white_24dp"
-        android:layout_alignParentBottom="true"
+        android:id="@+id/fab"
+        android:layout_gravity="bottom|right"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="false"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="16dp" />
+
+
 </RelativeLayout>

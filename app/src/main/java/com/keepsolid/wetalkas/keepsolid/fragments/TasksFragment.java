@@ -11,8 +11,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -43,7 +45,7 @@ import com.keepsolid.wetalkas.keepsolid.todo_sdk.model.TaskModel;
 import com.keepsolid.wetalkas.keepsolid.sdk.CustomPreferenceManager;
 import com.keepsolid.wetalkas.keepsolid.sdk.CustomSQLiteHelper;
 import com.keepsolid.wetalkas.keepsolid.services.TaskReminderService;
-import com.melnykov.fab.FloatingActionButton;
+
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -99,19 +101,19 @@ public class TasksFragment extends Fragment {
 
         taskAdapter = new TaskAdapter(getActivity());
 
+        lvTasks.setDivider(new ColorDrawable(activity.getResources().getColor(R.color.white_12)));   //0xAARRGGBB
+        lvTasks.setDividerHeight(1);
+
         lvTasks.setAdapter(taskAdapter);
 
         lvTasks.setOnItemLongClickListener(longClickListener);
-
-
-        lvTasks.setDividerHeight(0);
-        lvTasks.setDivider(null);
 
         preferenceManager = CustomPreferenceManager.getInstance();
 
         List<TaskModel> tasks = restoreTasks(null);
         taskAdapter.addTask(tasks);
         taskAdapter.notifyDataSetChanged();
+
 
         return rootView;
     }
@@ -181,6 +183,8 @@ public class TasksFragment extends Fragment {
 
 
         alert.setTitle("Adding task");
+
+
 
         ScrollView container = (ScrollView) getActivity().getLayoutInflater().inflate(R.layout.dialog_add_new_task, null);
 
@@ -270,13 +274,11 @@ public class TasksFragment extends Fragment {
 
 
 
-
-
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy HH:mm");
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
 
                 String date = etDate.getText().toString();
                 String time = etTime.getText().toString();
@@ -302,6 +304,8 @@ public class TasksFragment extends Fragment {
 
                 Intent intent = new Intent(getActivity(),
                         TaskReminderService.class);
+
+                intent.putExtra("task_title", etTitle.getText().toString());
 
                 PendingIntent pendingIntent = PendingIntent.getService(getActivity(), 0,
                         intent, 0);
@@ -332,6 +336,9 @@ public class TasksFragment extends Fragment {
 
 
         final AlertDialog alertDialog = alert.show();
+
+
+
 
 
         final Button positiveButoon = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
@@ -375,7 +382,7 @@ public class TasksFragment extends Fragment {
                 calendar.set(Calendar.MONTH, monthOfYear);
                 calendar.set(Calendar.YEAR, year);
                 calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yy");
                 etDate.setText(dateFormat.format(calendar.getTime()));
 
             }

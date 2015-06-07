@@ -46,7 +46,7 @@ public class Sdk {
         Locale currentLocale = context.getResources().getConfiguration().locale;
 
         Date date = new Date(initialDate); // *1000 is to convert seconds to milliseconds
-        SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy HH:mm", currentLocale); // the format of your date
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yy HH:mm", currentLocale); // the format of your date
         //sdf.setTimeZone(TimeZone.getTimeZone("GMT-4")); // give a timezone reference for formating (see comment at the bottom
         return sdf.format(initialDate);
     }

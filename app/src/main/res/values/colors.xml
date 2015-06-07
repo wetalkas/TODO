@@ -2,14 +2,29 @@
 <resources>
 
     <color name="colorPrimary">#009688</color>
-    <color name="colorPrimaryDark">#e300685d</color>
+    <color name="colorPrimaryDark">#00796B</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#454545</color>
 
-    <color name="priority_very_high">#c3d10006</color>
-    <color name="priority_high">#c3d16100</color>
-    <color name="priority_normal">#c3d1ce00</color>
-    <color name="priority_low">#c34bc200</color>
+
+    <color name="white_12">#1F000000</color>
+    
+    <color name="gray_50">#FAFAFA</color>
+    <color name="gray_100">#F5F5F5</color>
+    <color name="gray_200">#EEEEEE</color>
+    <color name="gray_300">#E0E0E0</color>
+
+    <color name="priority_very_high">#F44336</color>
+    <color name="priority_high">#FF9800</color>
+    <color name="priority_normal">#FFEB3B</color>
+    <color name="priority_low">#8BC34A</color>
+
+    <color name="priority_very_high_click">#D50000</color>
+    <color name="priority_high_click">#FF6D00</color>
+    <color name="priority_normal_click">#FFD600</color>
+    <color name="priority_low_click">#64DD17</color>
+
+
 
 
 

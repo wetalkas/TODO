@@ -22,7 +22,8 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/etDialogAddTaskName"/>
+                android:id="@+id/etDialogAddTaskName"
+                android:textSize="16sp" />
         </android.support.design.widget.TextInputLayout>
 
 
@@ -40,7 +41,8 @@
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/etDialogAddTaskDescription"/>
+                android:id="@+id/etDialogAddTaskDescription"
+                android:textSize="16sp" />
         </android.support.design.widget.TextInputLayout>
 
 
@@ -59,7 +61,8 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/etDialogAddTaskDate"
                 android:inputType="none"
-                android:focusableInTouchMode="false"/>
+                android:focusableInTouchMode="false"
+                android:textSize="16sp" />
         </android.support.design.widget.TextInputLayout>
 
 
@@ -78,7 +81,8 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/etDialogAddTaskTime"
                 android:inputType="none"
-                android:focusableInTouchMode="false"/>
+                android:focusableInTouchMode="false"
+                android:textSize="16sp" />
         </android.support.design.widget.TextInputLayout>
 
         <Spinner

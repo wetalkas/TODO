@@ -15,5 +15,9 @@ public class Constants {
     public static final int[] PRIORITY_COLORS = {R.color.priority_very_high, R.color.priority_high,
             R.color.priority_normal, R.color.priority_low};
 
+    public static final int[] PRIORITY_COLORS_CLICK = {R.color.priority_very_high_click, R.color.priority_high_click,
+            R.color.priority_normal_click, R.color.priority_low_click};
+
+
 
 }

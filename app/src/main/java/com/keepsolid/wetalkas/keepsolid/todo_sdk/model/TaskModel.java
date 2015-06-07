@@ -9,7 +9,7 @@ public class TaskModel {
     public final String description;
     public final long date;
     public final long priority;
-    public final boolean done;
+    public boolean done;
     public final long timeStamp;
 
 

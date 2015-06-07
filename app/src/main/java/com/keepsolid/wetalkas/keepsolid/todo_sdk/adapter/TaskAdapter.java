@@ -1,12 +1,16 @@
 package com.keepsolid.wetalkas.keepsolid.todo_sdk.adapter;
 
 import android.content.Context;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.support.design.widget.FloatingActionButton;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.keepsolid.wetalkas.keepsolid.R;
@@ -14,10 +18,11 @@ import com.keepsolid.wetalkas.keepsolid.todo_sdk.Constants;
 import com.keepsolid.wetalkas.keepsolid.todo_sdk.model.TaskModel;
 import com.keepsolid.wetalkas.keepsolid.sdk.Sdk;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
-
+import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class TaskAdapter extends ArrayAdapter<TaskModel> {
@@ -75,9 +80,11 @@ public class TaskAdapter extends ArrayAdapter<TaskModel> {
     }
 
 
+
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder viewHolder;
+        final ViewHolder viewHolder;
 
         if(convertView == null) {
             // inflate the GridView item layout
@@ -90,9 +97,7 @@ public class TaskAdapter extends ArrayAdapter<TaskModel> {
             viewHolder.tvTaskName = (TextView) convertView.findViewById(R.id.tvTaskName);
             viewHolder.tvTaskDescription = (TextView) convertView.findViewById(R.id.tvTaskDescription);
             viewHolder.tvTaskDate = (TextView) convertView.findViewById(R.id.tvTaskDate);
-            viewHolder.ivTaksPriority = (ImageView) convertView.findViewById(R.id.ivTaskPriority);
-            viewHolder.cbTaskDone = (CheckBox) convertView.findViewById(R.id.cbTaskDone);
-
+            viewHolder.ivTaksPriority = (CircleImageView) convertView.findViewById(R.id.ivTaskPriority);
             convertView.setTag(viewHolder);
         } else {
             // recycle the already inflated view
@@ -100,17 +105,35 @@ public class TaskAdapter extends ArrayAdapter<TaskModel> {
         }
 
         // update the item view
-        TaskModel item = tasks.get(position);
+        final TaskModel item = tasks.get(position);
 
 
 
         viewHolder.tvTaskName.setText(item.name);
         viewHolder.tvTaskDescription.setText(item.description);
         viewHolder.tvTaskDate.setText(Sdk.getDateWithCurrentLocale(item.date, context));
-        viewHolder.ivTaksPriority.setBackgroundColor(context.getResources().getColor(Constants.PRIORITY_COLORS[(int) item.priority]));
-        viewHolder.cbTaskDone.setChecked(item.done);
 
 
+        final View finalConvertView = convertView;
+
+
+        setChecking(viewHolder, item, finalConvertView);
+
+
+
+        viewHolder.ivTaksPriority.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                item.done = !item.done;
+
+                setChecking(viewHolder, item, finalConvertView);
+            }
+        });
+        //viewHolder.cbTaskDone.setChecked(item.done);
+
+
+       // LinearLayout.LayoutParams l
         return convertView;
     }
 
@@ -119,9 +142,44 @@ public class TaskAdapter extends ArrayAdapter<TaskModel> {
         TextView tvTaskName;
         TextView tvTaskDescription;
         TextView tvTaskDate;
-        ImageView ivTaksPriority;
+        CircleImageView ivTaksPriority;
         CheckBox cbTaskDone;
     }
+
+
+
+    public void setChecking(ViewHolder viewHolder, TaskModel item, View view) {
+        if (!item.done) {
+            setUnchecked(viewHolder, item, view);
+        } else {
+            setChecked(viewHolder, item, view);
+        }
+    }
+
+
+    private void setChecked(ViewHolder viewHolder, TaskModel item, View view) {
+        viewHolder.ivTaksPriority.setColorFilter(context.getResources()
+                .getColor(Constants.PRIORITY_COLORS_CLICK[(int) item.priority]));
+        viewHolder.ivTaksPriority.setImageDrawable(context.getResources()
+                .getDrawable(R.drawable.ic_checkbox_marked_circle_black_48dp));
+
+        view.setBackgroundColor(context.getResources().getColor(R.color.gray_200));
+
+    }
+
+
+    private void setUnchecked(ViewHolder viewHolder, TaskModel item, View view) {
+        viewHolder.ivTaksPriority.setImageDrawable(context.getResources()
+                .getDrawable(R.drawable.ic_checkbox_blank_circle_black_48dp));
+
+        viewHolder.ivTaksPriority.setColorFilter(context.getResources()
+                .getColor(Constants.PRIORITY_COLORS[(int) item.priority]));
+
+        view.setBackgroundColor(context.getResources().getColor(R.color.gray_50));
+
+    }
+
+
 
 }
 

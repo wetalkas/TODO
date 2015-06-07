@@ -1,6 +1,7 @@
 package com.keepsolid.wetalkas.keepsolid.activities;
 
 import android.app.FragmentManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -13,7 +14,6 @@ import com.keepsolid.wetalkas.keepsolid.fragments.TasksFragment;
 import com.keepsolid.wetalkas.keepsolid.sdk.CustomFragmentManager;
 import com.keepsolid.wetalkas.keepsolid.sdk.CustomPreferenceManager;
 import com.keepsolid.wetalkas.keepsolid.R;
-
 
 
 public class MainActivity extends ActionBarActivity {
@@ -99,6 +99,10 @@ public class MainActivity extends ActionBarActivity {
         if (fragmentManager.getBackStackEntryCount() > 1) {
             fragmentManager.popBackStack();
         }
+
+
+
+
 
 
     }
