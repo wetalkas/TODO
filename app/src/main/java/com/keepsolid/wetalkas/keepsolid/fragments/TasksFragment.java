@@ -14,7 +14,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -31,6 +34,7 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.SearchView;
 import android.widget.Spinner;
@@ -72,8 +76,12 @@ public class TasksFragment extends Fragment {
 
     MainActivity activity;
 
+    CoordinatorLayout coordinatorLayout;
+
 
     CustomPreferenceManager preferenceManager;
+
+    View view;
 
 
     @Override
@@ -82,6 +90,8 @@ public class TasksFragment extends Fragment {
         //Inflate the layout for this fragment
 
         View rootView = inflater.inflate(R.layout.fragment_tasks, container, false);
+
+
 
         CustomPreferenceManager.getInstance().init(getActivity().getApplicationContext(), "");
 
@@ -143,6 +153,27 @@ public class TasksFragment extends Fragment {
 
             //toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_dots_vertical_white_24dp));
         }
+
+
+        view = rootView;
+
+
+        coordinatorLayout = (CoordinatorLayout) rootView.findViewById(R.id.coordinatorLayout);
+
+
+
+        //FloatingActionButton floatingActionButton = new FloatingActionButton(activity);
+        CollapsingToolbarLayout.LayoutParams params = new CollapsingToolbarLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+
+        //floatingActionButton.setImageResource(R.drawable.ic_plus_white_24dp);
+
+
+        //coordinatorLayout.addView(floatingActionButton);
+
+
+
 
         searchView = (SearchView) rootView.findViewById(R.id.searchView);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -537,6 +568,7 @@ public class TasksFragment extends Fragment {
 
             removeTaskDialog(getActivity(), position);
 
+
             return false;
         }
     };
@@ -549,19 +581,59 @@ public class TasksFragment extends Fragment {
 
         alert.setTitle("Remove task");
 
+        final TaskModel deletingTask = taskAdapter.getTask(position);
+        final boolean[] isDeleted = {false};
+
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
 
-
-                long count = sqLiteDatabase.delete("tasks", CustomSQLiteHelper.TASK_TIME_COLUMN
-                        + " = " + taskAdapter.getItem(position).timeStamp, null);
-
                 taskAdapter.deleteItem(position);
                 taskAdapter.notifyDataSetChanged();
 
-                Log.d("deleting tasks from db", "count = " + count);
+                Log.d("deleting tasks from", "list");
+
+
+                isDeleted[0] = true;
+
+                Snackbar snackbar = Snackbar.make(coordinatorLayout, "Deleting", Snackbar.LENGTH_LONG);
+
+                snackbar.setAction("Cancel", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.d("snackbar", "click");
+                        taskAdapter.deleteAll();
+                        List<TaskModel> tasks = restoreTasks(null);
+                        taskAdapter.addTask(tasks);
+                        taskAdapter.notifyDataSetChanged();
+
+                        isDeleted[0] = false;
+                    }
+                });
+
+                snackbar.getView().addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+                    @Override
+                    public void onViewAttachedToWindow(View v) {
+                        Log.d("snackbar", "attach");
+                    }
+
+                    @Override
+                    public void onViewDetachedFromWindow(View v) {
+                        Log.d("snackbar", "detach");
+
+                        if (isDeleted[0]) {
+
+                            long count = sqLiteDatabase.delete("tasks", CustomSQLiteHelper.TASK_TIME_COLUMN
+                                    + " = " + deletingTask.timeStamp, null);
+
+                            Log.d("deleting tasks from db", "count = " + count);
+                        }
+                    }
+                });
+
+                snackbar.show();
+
             }
         });
 
