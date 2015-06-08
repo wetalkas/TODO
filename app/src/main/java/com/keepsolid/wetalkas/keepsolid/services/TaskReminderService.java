@@ -81,13 +81,13 @@ public class TaskReminderService extends Service {
         builder.setContentIntent(contentIntent)
                 .setSmallIcon(R.drawable.ic_clock_white_24dp)
                         // большая картинка
-                //.setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.ic_clock_white_36dp))
+                        //.setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.ic_clock_white_36dp))
                         //.setTicker(res.getString(R.string.warning)) // текст в строке состояния
-                .setTicker("Последнее китайское предупреждение!")
+                .setTicker(intent.getStringExtra("task_title"))
                 .setWhen(System.currentTimeMillis())
                 .setAutoCancel(true)
                         //.setContentTitle(res.getString(R.string.notifytitle)) // Заголовок уведомления
-                .setContentTitle("Reminder")
+                .setContentTitle(getString(R.string.app_name))
                         //.setContentText(res.getString(R.string.notifytext))
                 .setContentText(intent.getStringExtra("task_title")); // Текст уведомленимя
 

@@ -120,7 +120,9 @@ public class TasksFragment extends Fragment {
 
         preferenceManager = CustomPreferenceManager.getInstance();
 
-        List<TaskModel> tasks = restoreTasks(null);
+        String order = preferenceManager.getString("order");
+
+        List<TaskModel> tasks = restoreTasks(order);
         taskAdapter.addTask(tasks);
         taskAdapter.notifyDataSetChanged();
 
@@ -309,7 +311,7 @@ public class TasksFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yy HH:mm");
 
                 String date = etDate.getText().toString();
                 String time = etTime.getText().toString();
@@ -341,10 +343,8 @@ public class TasksFragment extends Fragment {
                 PendingIntent pendingIntent = PendingIntent.getService(getActivity(), 0,
                         intent, 0);
 
-
                 AlarmManager manager = (AlarmManager) getActivity().getSystemService(
                         Context.ALARM_SERVICE);
-
 
                 manager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
 
@@ -468,23 +468,28 @@ public class TasksFragment extends Fragment {
             public void onClick(DialogInterface dialog, int which) {
 
                 List<TaskModel> tasks = new ArrayList<TaskModel>();
+                String order = null;
                 switch (which) {
                     case 0:
                         taskAdapter.deleteAll();
-                        tasks = restoreTasks(CustomSQLiteHelper.TASK_DATE_COLUMN);
+                        order = CustomSQLiteHelper.TASK_DATE_COLUMN;
+                        tasks = restoreTasks(order);
                         break;
                     case 1:
                         taskAdapter.deleteAll();
-                        tasks = restoreTasks(CustomSQLiteHelper.TASK_NAME_COLUMN);
+                        order = CustomSQLiteHelper.TASK_NAME_COLUMN;
+                        tasks = restoreTasks(order);
                         break;
 
                     case 2:
                         taskAdapter.deleteAll();
-                        tasks = restoreTasks(CustomSQLiteHelper.TASK_PRIORITY_COLUMN);
+                        order = CustomSQLiteHelper.TASK_PRIORITY_COLUMN;
+                        tasks = restoreTasks(order);
                         break;
                 }
 
                 if (!tasks.isEmpty()) {
+                    preferenceManager.putString("order", order);
                     taskAdapter.addTask(tasks);
                     taskAdapter.notifyDataSetChanged();
                 }
@@ -662,6 +667,7 @@ public class TasksFragment extends Fragment {
 
 
         Cursor c = sqLiteDatabase.query("tasks", null, selection, selectionArgs, null, null, null);
+
 
 
         if (c.moveToFirst()) {
