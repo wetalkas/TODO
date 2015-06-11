@@ -1,6 +1,7 @@
 package com.keepsolid.wetalkas.keepsolid.fragments;
 
 
+import android.app.FragmentManager;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.keepsolid.wetalkas.keepsolid.R;
+import com.keepsolid.wetalkas.keepsolid.sdk.CustomFragmentManager;
 import com.keepsolid.wetalkas.keepsolid.sdk.CustomPreferenceManager;
 
 import java.util.ArrayList;
@@ -29,15 +31,23 @@ public class RegistrationFragment extends Fragment {
 
     CustomPreferenceManager preferenceManager;
 
+    CustomFragmentManager fragmentManager;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        View rootView = inflater.inflate(R.layout.fragment_registration, container, false);
+
+        preferenceManager = CustomPreferenceManager.getInstance();
+
+        fragmentManager = CustomFragmentManager.getInstance();
+
+        setUpUI(rootView);
 
 
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_registration, container, false);
+        return rootView;
     }
 
 
@@ -55,8 +65,8 @@ public class RegistrationFragment extends Fragment {
         btRegSignUp.setOnClickListener(onSignUpClick);
 
 
-        etRegEmail.setText(preferenceManager.getString("Login"));
-        etRegPassword.setText(preferenceManager.getString("Password"));
+        etRegEmail.setText(preferenceManager.getString("saved_login_for_registration"));
+
 
 
 
@@ -68,13 +78,22 @@ public class RegistrationFragment extends Fragment {
         public void onClick(View v) {
 
             if (etRegEmail.getText().toString().equals("") || etRegEmail.getText().toString().equals(" ")) {
-                Toast.makeText(getActivity(), "Enter your email", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Enter your login", Toast.LENGTH_SHORT).show();
             } else if (etRegPassword.getText().toString().equals("")) {
                 Toast.makeText(getActivity(), "Enter your password", Toast.LENGTH_SHORT).show();
             } else if (etRegRetryPassword.getText().toString().equals("")) {
                 Toast.makeText(getActivity(), "Retry your password", Toast.LENGTH_SHORT).show();
             } else if (!etRegPassword.getText().toString().equals(etRegRetryPassword.getText().toString())) {
                 Toast.makeText(getActivity(), "Retry your password correct", Toast.LENGTH_SHORT).show();
+
+            } else {
+                preferenceManager.putString(etRegEmail.getText().toString(), etRegPassword.getText().toString());
+
+                fragmentManager.getFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                AuthorisationFragment authorisationFragment = new AuthorisationFragment();
+                fragmentManager.setFragment(R.id.container, authorisationFragment, false);
+
+
 
             }
 

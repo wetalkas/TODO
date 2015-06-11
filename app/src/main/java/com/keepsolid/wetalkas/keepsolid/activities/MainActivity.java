@@ -31,15 +31,18 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+
+        CustomPreferenceManager.getInstance().init(getApplicationContext());
+
+
         tasksFragment = new TasksFragment();
 
         splashFragment = new SplashFragment();
 
 
 
-        AuthorisationFragment authorisationFragment = new AuthorisationFragment();
 
-        CustomPreferenceManager.getInstance().init(getApplicationContext(), "");
 
         CustomFragmentManager.getInstance().init(this);
 

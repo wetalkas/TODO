@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.keepsolid.wetalkas.keepsolid.R;
 
+import com.keepsolid.wetalkas.keepsolid.activities.MainActivity;
 import com.keepsolid.wetalkas.keepsolid.sdk.CustomFragmentManager;
 import com.keepsolid.wetalkas.keepsolid.sdk.CustomPreferenceManager;
 
@@ -30,9 +31,13 @@ public class AuthorisationFragment extends Fragment {
 
     Button btAuthLogIn;
     Button btAuthSignUp;
-    Button btOpenScrollView;
+
+    MainActivity activity;
 
     CustomPreferenceManager preferenceManager;
+
+    CustomFragmentManager customFragmentManager;
+
 
 
     @Override
@@ -42,8 +47,16 @@ public class AuthorisationFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_authorisation, container, false);
 
+        if (getActivity() != null) {
+            activity = (MainActivity) getActivity();
+        }
 
-        SearchView sv = (SearchView)rootView.findViewById(R.id.searchView);
+
+        preferenceManager = CustomPreferenceManager.getInstance();
+
+
+
+        customFragmentManager = CustomFragmentManager.getInstance();
 
 
         setUpUI(rootView);
@@ -58,7 +71,6 @@ public class AuthorisationFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
 
-        preferenceManager = CustomPreferenceManager.getInstance();
 
 
 
@@ -82,14 +94,12 @@ public class AuthorisationFragment extends Fragment {
 
         btAuthLogIn = (Button)rootView.findViewById(R.id.btAuthLogIn);
         btAuthSignUp = (Button)rootView.findViewById(R.id.btAuthSignUp);
-        btOpenScrollView = (Button)rootView.findViewById(R.id.btOpenScrollView);
 
 
 
 
         btAuthLogIn.setOnClickListener(onLogInClick);
         btAuthSignUp.setOnClickListener(onSignUpClick);
-        btOpenScrollView.setOnClickListener(onScrollActivityClick);
     }
 
 
@@ -100,13 +110,23 @@ public class AuthorisationFragment extends Fragment {
         public void onClick(View v) {
 
             if (etAuthEmail.getText().toString().equals("") || etAuthEmail.getText().toString().equals(" ")) {
-                Toast.makeText(getActivity(), "Enter your email", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Enter your login", Toast.LENGTH_SHORT).show();
             } else if (etAuthPassword.getText().toString().equals("")) {
                 Toast.makeText(getActivity(), "Enter your password", Toast.LENGTH_SHORT).show();
             } else {
 
-                preferenceManager.putString("Login", etAuthEmail.getText().toString());
-                preferenceManager.putString("Password", etAuthPassword.getText().toString());
+                String currentLogin = etAuthEmail.getText().toString();
+
+                String currentPasswordPref = preferenceManager.getString(currentLogin);
+
+                if (!currentPasswordPref.isEmpty() && currentPasswordPref.equals(etAuthPassword.getText().toString())) {
+
+
+                    preferenceManager.putString("current_login", currentLogin);
+                    customFragmentManager.setFragment(R.id.container, activity.getTasksFragment(), false);
+                } else {
+                    Toast.makeText(getActivity(), "Wrong login or password", Toast.LENGTH_LONG).show();
+                }
 
 
             }
@@ -119,11 +139,9 @@ public class AuthorisationFragment extends Fragment {
         @Override
         public void onClick(View v) {
 
-            preferenceManager.putString("Login", etAuthEmail.getText().toString());
-            preferenceManager.putString("Password", etAuthPassword.getText().toString());
+            preferenceManager.putString("saved_login_for_registration", etAuthEmail.getText().toString());
 
 
-            CustomFragmentManager customFragmentManager = CustomFragmentManager.getInstance();
 
             RegistrationFragment registrationFragment = new RegistrationFragment();
 
@@ -147,16 +165,7 @@ public class AuthorisationFragment extends Fragment {
         }
     };
 
-    View.OnClickListener onScrollActivityClick = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
 
-            /*Intent intent = new Intent();
-            intent.setClass(getActivity(), ScrollActivity.class);
-            startActivity(intent);*/
-
-        }
-    };
 
 
 

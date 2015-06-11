@@ -13,7 +13,6 @@ public class CustomPreferenceManager {
     private static CustomPreferenceManager instance;
 
     private Context context;
-    private String userLogin;
 
 
     private CustomPreferenceManager() {
@@ -32,9 +31,8 @@ public class CustomPreferenceManager {
     }
 
 
-    public void init(Context context, String userLogin){
+    public void init(Context context){
         this.context = context;
-        this.userLogin = userLogin;
     }
 
 

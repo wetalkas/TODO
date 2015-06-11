@@ -66,6 +66,10 @@ public class TaskReminderService extends Service {
 
     private void notifyTask(Intent intent) {
 
+        String text = "Remind";
+        if (intent != null) {
+            text = intent.getStringExtra("task_title");
+        }
 
         Context context = getApplicationContext();
 
@@ -83,13 +87,13 @@ public class TaskReminderService extends Service {
                         // большая картинка
                         //.setLargeIcon(BitmapFactory.decodeResource(res, R.drawable.ic_clock_white_36dp))
                         //.setTicker(res.getString(R.string.warning)) // текст в строке состояния
-                .setTicker(intent.getStringExtra("task_title"))
+                .setTicker(text)
                 .setWhen(System.currentTimeMillis())
                 .setAutoCancel(true)
                         //.setContentTitle(res.getString(R.string.notifytitle)) // Заголовок уведомления
                 .setContentTitle(getString(R.string.app_name))
                         //.setContentText(res.getString(R.string.notifytext))
-                .setContentText(intent.getStringExtra("task_title")); // Текст уведомленимя
+                .setContentText(text); // Текст уведомленимя
 
 
 

@@ -54,12 +54,4 @@
         android:layout_alignRight="@+id/etAuthPassword"
         android:layout_alignEnd="@+id/etAuthPassword" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ScrollView"
-        android:id="@+id/btOpenScrollView"
-        android:layout_below="@+id/btAuthLogIn"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="67dp" />
 </RelativeLayout>

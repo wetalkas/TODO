@@ -31,6 +31,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -81,6 +83,8 @@ public class TasksFragment extends Fragment {
 
     CustomPreferenceManager preferenceManager;
 
+    String currentLogin;
+
     View view;
 
 
@@ -93,7 +97,10 @@ public class TasksFragment extends Fragment {
 
 
 
-        CustomPreferenceManager.getInstance().init(getActivity().getApplicationContext(), "");
+        preferenceManager = CustomPreferenceManager.getInstance();
+
+        currentLogin = preferenceManager.getString("current_login");
+
 
         if (getActivity() != null) {
             activity = (MainActivity)getActivity();
@@ -109,7 +116,11 @@ public class TasksFragment extends Fragment {
         sqLiteDatabase = customSQLiteHelper.getWritableDatabase();
 
 
+
+
         taskAdapter = new TaskAdapter(getActivity());
+
+        taskAdapter.setDataBase(sqLiteDatabase);
 
         lvTasks.setDivider(new ColorDrawable(activity.getResources().getColor(R.color.white_12)));   //0xAARRGGBB
         lvTasks.setDividerHeight(1);
@@ -118,9 +129,10 @@ public class TasksFragment extends Fragment {
 
         lvTasks.setOnItemLongClickListener(longClickListener);
 
-        preferenceManager = CustomPreferenceManager.getInstance();
 
         String order = preferenceManager.getString("order");
+
+
 
         List<TaskModel> tasks = restoreTasks(order);
         taskAdapter.addTask(tasks);
@@ -233,6 +245,8 @@ public class TasksFragment extends Fragment {
         final TextInputLayout tilTime = (TextInputLayout) container.findViewById(R.id.tilDialogAddTaskTime);
         final EditText etTime = tilTime.getEditText();
 
+        final CheckBox cbAddTaskRemind = (CheckBox) container.findViewById(R.id.cbAddTaskRemind);
+
         final Spinner spPriority = (Spinner) container.findViewById(R.id.spDialogAddTaskPriority);
 
         final long[] priority = {0};
@@ -244,6 +258,27 @@ public class TasksFragment extends Fragment {
         tilDate.setHint("Date");
         tilTime.setHint("Time");
 
+
+        etDate.setEnabled(false);
+        etTime.setEnabled(false);
+
+        cbAddTaskRemind.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    etDate.setEnabled(true);
+                    etTime.setEnabled(true);
+                } else {
+                    etDate.setEnabled(false);
+                    etTime.setEnabled(false);
+
+                    etDate.setText(null);
+                    etTime.setText(null);
+                }
+            }
+
+
+        });
 
 
 
@@ -318,13 +353,17 @@ public class TasksFragment extends Fragment {
 
                 String dateFullString = date + " " + time;
 
-                Date dateFull = new Date();
+                Date dateFull = null;
+
+                long dateLong = 0;
 
 
                 if (!dateFullString.equals(" ")) {
                     try {
 
                         dateFull = dateFormat.parse(dateFullString);
+                        dateLong = dateFull.getTime();
+
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -332,27 +371,32 @@ public class TasksFragment extends Fragment {
                 }
 
 
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(dateFull.getTime());
+                if (cbAddTaskRemind.isChecked() && dateFull != null) {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTimeInMillis(dateFull.getTime());
 
-                Intent intent = new Intent(getActivity(),
-                        TaskReminderService.class);
+                    Intent intent = new Intent(getActivity(),
+                            TaskReminderService.class);
 
-                intent.putExtra("task_title", etTitle.getText().toString());
+                    intent.putExtra("task_title", etTitle.getText().toString());
 
-                PendingIntent pendingIntent = PendingIntent.getService(getActivity(), 0,
-                        intent, 0);
+                    PendingIntent pendingIntent = PendingIntent.getService(getActivity(), 0,
+                            intent, 0);
 
-                AlarmManager manager = (AlarmManager) getActivity().getSystemService(
-                        Context.ALARM_SERVICE);
+                    AlarmManager manager = (AlarmManager) getActivity().getSystemService(
+                            Context.ALARM_SERVICE);
 
-                manager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                    manager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                }
+
+
 
                 TaskModel taskItem = new TaskModel(etTitle.getText().toString(), etDescription.getText().toString(),
-                        dateFull.getTime(), priority[0], false, new Date().getTime());
+                        dateLong, priority[0], 0, new Date().getTime());
                 addTask(taskItem);
 
-
+etDate.setEnabled(true);
+                    etTime.setEnabled(true);
             }
 
 
@@ -486,6 +530,13 @@ public class TasksFragment extends Fragment {
                         order = CustomSQLiteHelper.TASK_PRIORITY_COLUMN;
                         tasks = restoreTasks(order);
                         break;
+
+
+                    case 3:
+                        taskAdapter.deleteAll();
+                        order = CustomSQLiteHelper.TASK_STATUS_COLUMN;
+                        tasks = restoreTasks(order);
+                        break;
                 }
 
                 if (!tasks.isEmpty()) {
@@ -513,6 +564,8 @@ public class TasksFragment extends Fragment {
 
         ContentValues newValues = new ContentValues();
         // Задайте значения для каждой строки.
+
+        newValues.put(CustomSQLiteHelper.USER_LOGIN_COLUMN, currentLogin);
         newValues.put(CustomSQLiteHelper.TASK_NAME_COLUMN, taskItem.name);
         newValues.put(CustomSQLiteHelper.TASK_DESCRIPTION_COLUMN, taskItem.description);
         newValues.put(CustomSQLiteHelper.TASK_DATE_COLUMN, taskItem.date);
@@ -535,7 +588,12 @@ public class TasksFragment extends Fragment {
     public List<TaskModel> restoreTasks(String orderBy) {
         List<TaskModel> tasks = new ArrayList<>();
 
-        Cursor c = sqLiteDatabase.query("tasks", null, null, null, null, null, orderBy);
+
+
+        String selection = CustomSQLiteHelper.USER_LOGIN_COLUMN + " = ?";
+        String[] selectionArgs = new String[] {currentLogin};
+
+        Cursor c = sqLiteDatabase.query("tasks", null, selection, selectionArgs, null, null, orderBy);
 
         if (c.moveToFirst()) {
 
@@ -545,7 +603,7 @@ public class TasksFragment extends Fragment {
                 String taskDescr = c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_DESCRIPTION_COLUMN));
                 long taskDate = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_DATE_COLUMN));
                 long priority = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_PRIORITY_COLUMN));
-                boolean taskStatus = Boolean.getBoolean(c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_STATUS_COLUMN)));
+                long taskStatus = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_STATUS_COLUMN));
                 long timeStamp = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_TIME_COLUMN));
 
                 TaskModel item = new TaskModel(taskName, taskDescr, taskDate, priority, taskStatus, timeStamp);
@@ -660,10 +718,10 @@ public class TasksFragment extends Fragment {
         List<TaskModel> tasks = new ArrayList<>();
 
 
-        String[] columns = new String[] { CustomSQLiteHelper.TASK_NAME_COLUMN };
 
-        String selection = CustomSQLiteHelper.TASK_NAME_COLUMN + " LIKE ?";
-        String[] selectionArgs = new String[] {"%" + key + "%"};
+        String selection = CustomSQLiteHelper.TASK_NAME_COLUMN + " LIKE ? AND "
+                + CustomSQLiteHelper.USER_LOGIN_COLUMN + " = ?";
+        String[] selectionArgs = new String[] {"%" + key + "%", currentLogin};
 
 
         Cursor c = sqLiteDatabase.query("tasks", null, selection, selectionArgs, null, null, null);
@@ -678,7 +736,7 @@ public class TasksFragment extends Fragment {
                 String taskDescr = c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_DESCRIPTION_COLUMN));
                 long taskDate = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_DATE_COLUMN));
                 long taskPriority = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_PRIORITY_COLUMN));
-                boolean taskStatus = Boolean.getBoolean(c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_STATUS_COLUMN)));
+                long taskStatus = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_STATUS_COLUMN));
                 long timeStamp = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_TIME_COLUMN));
 
                 TaskModel item = new TaskModel(taskName, taskDescr, taskDate, taskPriority, taskStatus, timeStamp);
@@ -703,5 +761,10 @@ public class TasksFragment extends Fragment {
 
         taskAdapter.deleteAll();
         taskAdapter.notifyDataSetChanged();
+    }
+
+
+    public SQLiteDatabase getSqLiteDatabase() {
+        return sqLiteDatabase;
     }
 }

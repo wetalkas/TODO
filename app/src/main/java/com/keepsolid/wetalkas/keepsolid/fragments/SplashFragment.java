@@ -72,7 +72,8 @@ public class SplashFragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
 
-            customFragmentManager.setFragment(R.id.container, activity.getTasksFragment(), false);
+            AuthorisationFragment authorisationFragment = new AuthorisationFragment();
+            customFragmentManager.setFragment(R.id.container, authorisationFragment, false);
         }
     }
 
