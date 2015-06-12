@@ -372,9 +372,6 @@ public class TasksFragment extends Fragment {
 
 
                 if (cbAddTaskRemind.isChecked() && dateFull != null) {
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTimeInMillis(dateFull.getTime());
-
                     Intent intent = new Intent(getActivity(),
                             TaskReminderService.class);
 
@@ -386,7 +383,7 @@ public class TasksFragment extends Fragment {
                     AlarmManager manager = (AlarmManager) getActivity().getSystemService(
                             Context.ALARM_SERVICE);
 
-                    manager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                    manager.set(AlarmManager.RTC, dateFull.getTime(), pendingIntent);
                 }
 
 

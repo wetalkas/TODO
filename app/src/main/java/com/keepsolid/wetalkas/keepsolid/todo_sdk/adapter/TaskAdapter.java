@@ -4,17 +4,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
-import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.keepsolid.wetalkas.keepsolid.R;
@@ -137,18 +132,11 @@ public class TaskAdapter extends ArrayAdapter<TaskModel> {
         viewHolder.ivTaksPriority.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 item.doneBool = !item.doneBool;
-
-                updateCheck(item);
-
+                updateCheckToDB(item);
                 setChecking(viewHolder, item, finalConvertView);
             }
         });
-        //viewHolder.cbTaskDone.setChecked(item.done);
-
-
-        // LinearLayout.LayoutParams l
         return convertView;
     }
 
@@ -221,7 +209,7 @@ public class TaskAdapter extends ArrayAdapter<TaskModel> {
     }
 
 
-    public void updateCheck(TaskModel task) {
+    public void updateCheckToDB(TaskModel task) {
         ContentValues cv = new ContentValues();
 
         if (task.doneBool) {

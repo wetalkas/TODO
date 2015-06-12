@@ -23,9 +23,6 @@ public class TaskReminderService extends Service {
     public void onCreate() {
         super.onCreate();
 
-
-
-        //Toast.makeText(this, "Служюа создана", Toast.LENGTH_LONG).show();
     }
 
 
@@ -33,14 +30,9 @@ public class TaskReminderService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-
-        //Toast.makeText(this, "Напоминание", Toast.LENGTH_LONG).show();
-
-        notifyTask(intent);
-
-
-
-
+        if (intent != null) {
+            notifyTask(intent);
+        }
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -55,7 +47,6 @@ public class TaskReminderService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
