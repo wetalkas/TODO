@@ -2,16 +2,20 @@ package com.keepsolid.wetalkas.keepsolid.fragments;
 
 
 import android.app.FragmentManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.design.widget.TextInputLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.keepsolid.wetalkas.keepsolid.R;
+import com.keepsolid.wetalkas.keepsolid.activities.MainActivity;
 import com.keepsolid.wetalkas.keepsolid.sdk.CustomFragmentManager;
 import com.keepsolid.wetalkas.keepsolid.sdk.CustomPreferenceManager;
 
@@ -26,7 +30,13 @@ public class RegistrationFragment extends Fragment {
     EditText etRegPassword;
     EditText etRegRetryPassword;
 
+    TextInputLayout tilRegEmail;
+    TextInputLayout tilRegPassword;
+    TextInputLayout tilRegRetryPassword;
+
     Button btRegSignUp;
+
+    MainActivity activity;
 
 
     CustomPreferenceManager preferenceManager;
@@ -38,6 +48,11 @@ public class RegistrationFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_registration, container, false);
+
+
+        if (getActivity() != null) {
+            activity = (MainActivity) getActivity();
+        }
 
         preferenceManager = CustomPreferenceManager.getInstance();
 
@@ -53,9 +68,18 @@ public class RegistrationFragment extends Fragment {
 
     public void setUpUI(View rootView) {
 
-        etRegEmail = (EditText)rootView.findViewById(R.id.etRegEmail);
-        etRegPassword = (EditText)rootView.findViewById(R.id.etRegPassword);
-        etRegRetryPassword = (EditText)rootView.findViewById(R.id.etRegRetryPassword);
+
+        tilRegEmail = (TextInputLayout)rootView.findViewById(R.id.tilRegEmail);
+        tilRegEmail.setHint(activity.getResources().getString(R.string.email));
+        etRegEmail = tilRegEmail.getEditText();
+
+        tilRegPassword = (TextInputLayout)rootView.findViewById(R.id.tilRegPassword);
+        tilRegPassword.setHint(activity.getResources().getString(R.string.password));
+        etRegPassword = tilRegPassword.getEditText();
+
+        tilRegRetryPassword = (TextInputLayout)rootView.findViewById(R.id.tilRegRetryPassword);
+        tilRegRetryPassword.setHint(activity.getResources().getString(R.string.retry_password));
+        etRegRetryPassword = tilRegRetryPassword.getEditText();
 
 
         btRegSignUp = (Button)rootView.findViewById(R.id.btRegSignUp);
@@ -66,6 +90,11 @@ public class RegistrationFragment extends Fragment {
 
 
         etRegEmail.setText(preferenceManager.getString("saved_login_for_registration"));
+
+
+        etRegEmail.requestFocus();
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 
 
 

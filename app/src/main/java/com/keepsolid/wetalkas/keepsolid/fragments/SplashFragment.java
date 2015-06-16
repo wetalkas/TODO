@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import com.keepsolid.wetalkas.keepsolid.R;
 import com.keepsolid.wetalkas.keepsolid.activities.MainActivity;
 import com.keepsolid.wetalkas.keepsolid.sdk.CustomFragmentManager;
+import com.keepsolid.wetalkas.keepsolid.sdk.CustomPreferenceManager;
 
 import java.util.concurrent.TimeUnit;
 
@@ -23,6 +24,7 @@ public class SplashFragment extends Fragment {
 
 
     CustomFragmentManager customFragmentManager;
+    CustomPreferenceManager preferenceManager;
 
     MainActivity activity;
 
@@ -35,6 +37,8 @@ public class SplashFragment extends Fragment {
         AsyncTaskCustom asyncTaskCustom = new AsyncTaskCustom();
 
         asyncTaskCustom.execute();
+
+        preferenceManager = CustomPreferenceManager.getInstance();
 
 
         customFragmentManager = CustomFragmentManager.getInstance();
@@ -72,8 +76,15 @@ public class SplashFragment extends Fragment {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
 
-            AuthorisationFragment authorisationFragment = new AuthorisationFragment();
-            customFragmentManager.setFragment(R.id.container, authorisationFragment, false);
+            String currentLogin = preferenceManager.getString("current_login");
+            boolean remembered = preferenceManager.getBoolean("remembered");
+
+            if (!currentLogin.isEmpty() && remembered) {
+                customFragmentManager.setFragment(R.id.container, activity.getTasksFragment(), false);
+            } else {
+                AuthorisationFragment authorisationFragment = new AuthorisationFragment();
+                customFragmentManager.setFragment(R.id.container, authorisationFragment, false);
+            }
         }
     }
 

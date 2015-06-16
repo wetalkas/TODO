@@ -49,4 +49,21 @@ public class CustomPreferenceManager {
         editor.putString(key, value);
         editor.apply();
     }
+
+
+    public boolean getBoolean(String key) {
+        return context.getSharedPreferences("ToDoList", Context.MODE_PRIVATE).getBoolean(key, false);
+    }
+
+
+    public void putBoolean(String key, boolean value) {
+        SharedPreferences preferences = context.getSharedPreferences("ToDoList", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        editor.putBoolean(key, value);
+        editor.apply();
+    }
+
+
+
 }

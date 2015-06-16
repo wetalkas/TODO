@@ -2,14 +2,19 @@ package com.keepsolid.wetalkas.keepsolid.fragments;
 
 
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.SearchView;
 import android.widget.Toast;
@@ -29,8 +34,13 @@ public class AuthorisationFragment extends Fragment {
     EditText etAuthEmail;
     EditText etAuthPassword;
 
+    TextInputLayout tilAuthEmail;
+    TextInputLayout tilAuthPassword;
+
     Button btAuthLogIn;
     Button btAuthSignUp;
+
+    CheckBox cbAuthRememberMe;
 
     MainActivity activity;
 
@@ -51,6 +61,8 @@ public class AuthorisationFragment extends Fragment {
             activity = (MainActivity) getActivity();
         }
 
+        setUpUI(rootView);
+
 
         preferenceManager = CustomPreferenceManager.getInstance();
 
@@ -59,42 +71,34 @@ public class AuthorisationFragment extends Fragment {
         customFragmentManager = CustomFragmentManager.getInstance();
 
 
-        setUpUI(rootView);
+
 
 
         return rootView;
     }
 
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-
-
-
-
-        //((ActionBarActivity)getActivity()).setSupportActionBar();
-
-
-
-
-    }
-
-
-
-
-
-
 
     public void setUpUI(View rootView) {
 
-        etAuthEmail = (EditText)rootView.findViewById(R.id.etAuthEmail);
-        etAuthPassword = (EditText)rootView.findViewById(R.id.etAuthPassword);
+
+        tilAuthEmail = (TextInputLayout)rootView.findViewById(R.id.tilAuthEmail);
+        etAuthEmail = tilAuthEmail.getEditText();
+
+        tilAuthPassword = (TextInputLayout)rootView.findViewById(R.id.tilAuthPassword);
+        etAuthPassword = tilAuthPassword.getEditText();
+
+        tilAuthEmail.setHint(activity.getResources().getString(R.string.email));
+        tilAuthPassword.setHint(activity.getResources().getString(R.string.password));
 
         btAuthLogIn = (Button)rootView.findViewById(R.id.btAuthLogIn);
         btAuthSignUp = (Button)rootView.findViewById(R.id.btAuthSignUp);
 
+        cbAuthRememberMe = (CheckBox) rootView.findViewById(R.id.cbAuthRememberMe);
+
+        etAuthEmail.requestFocus();
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 
 
 
@@ -120,6 +124,9 @@ public class AuthorisationFragment extends Fragment {
                 String currentPasswordPref = preferenceManager.getString(currentLogin);
 
                 if (!currentPasswordPref.isEmpty() && currentPasswordPref.equals(etAuthPassword.getText().toString())) {
+
+
+                    preferenceManager.putBoolean("remembered", cbAuthRememberMe.isChecked());
 
 
                     preferenceManager.putString("current_login", currentLogin);

@@ -6,54 +6,73 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
+    android:background="@color/gray_50"
     tools:context="com.keepsolid.wetalkas.keepsolid.activities.RegistrationActivity">
 
 
 
-    <EditText
-        android:layout_width="300dp"
-        android:layout_height="40dp"
-        android:inputType="textEmailAddress"
-        android:ems="10"
-        android:id="@+id/etRegEmail"
-        android:hint="@string/email"
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tilRegEmail"
+        android:layout_alignLeft="@+id/tilRegPassword"
+        android:layout_alignStart="@+id/tilRegPassword"
+        android:layout_marginTop="120dp"
+        android:layout_marginBottom="16dp">
+        <EditText
+            android:layout_width="300dp"
+            android:layout_height="40dp"
+            android:inputType="textEmailAddress"
+            android:ems="10"
+            android:id="@+id/etRegEmail"
+            android:textSize="16sp" />
+    </android.support.design.widget.TextInputLayout>
 
 
-        android:layout_alignLeft="@+id/etRegPassword"
-        android:layout_alignStart="@+id/etRegPassword"
-        android:layout_marginTop="120dp" />
 
-    <EditText
-        android:layout_width="300dp"
-        android:layout_height="40dp"
-        android:inputType="textPassword"
-        android:ems="10"
-        android:id="@+id/etRegPassword"
-        android:hint="@string/password"
-
-        android:layout_below="@+id/etRegEmail"
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tilRegPassword"
+        android:layout_below="@+id/tilRegEmail"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="5dp" />
+        android:layout_marginBottom="16dp">
+        <EditText
+            android:layout_width="300dp"
+            android:layout_height="40dp"
+            android:inputType="textPassword"
+            android:ems="10"
+            android:id="@+id/etRegPassword"
+            android:textSize="16sp" />
+    </android.support.design.widget.TextInputLayout>
 
-    <EditText
-        android:layout_width="300dp"
-        android:layout_height="40dp"
-        android:inputType="textPassword"
-        android:ems="10"
-        android:id="@+id/etRegRetryPassword"
-        android:layout_below="@+id/etRegPassword"
+
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tilRegRetryPassword"
+        android:layout_below="@+id/tilRegPassword"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="5dp"
-        android:hint="@string/retry_password" />
+        android:layout_marginBottom="16dp">
+        <EditText
+            android:layout_width="300dp"
+            android:layout_height="40dp"
+            android:inputType="textPassword"
+            android:ems="10"
+            android:id="@+id/etRegRetryPassword"
+            android:textSize="16sp" />
+    </android.support.design.widget.TextInputLayout>
+
 
     <Button
         android:layout_width="145dp"
         android:layout_height="45dp"
         android:text="@string/sign_up"
         android:id="@+id/btRegSignUp"
-        android:layout_below="@+id/etRegRetryPassword"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp" />
+        android:layout_below="@+id/tilRegRetryPassword"
+        android:layout_centerHorizontal="true" />
 
 
 

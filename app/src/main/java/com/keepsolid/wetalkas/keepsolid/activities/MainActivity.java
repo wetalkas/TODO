@@ -1,11 +1,13 @@
 package com.keepsolid.wetalkas.keepsolid.activities;
 
 import android.app.FragmentManager;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.keepsolid.wetalkas.keepsolid.fragments.AuthorisationFragment;
 import com.keepsolid.wetalkas.keepsolid.fragments.SettingsFragment;
@@ -20,8 +22,11 @@ public class MainActivity extends ActionBarActivity {
 
 
 
+    boolean doubleBackToExitPressedOnce;
+
     private CustomFragmentManager customFragmentManager;
     private TasksFragment tasksFragment;
+    private CustomPreferenceManager preferenceManager;
 
     private SplashFragment splashFragment;
 
@@ -33,7 +38,11 @@ public class MainActivity extends ActionBarActivity {
 
 
 
+
+
         CustomPreferenceManager.getInstance().init(getApplicationContext());
+
+        preferenceManager = CustomPreferenceManager.getInstance();
 
 
         tasksFragment = new TasksFragment();
@@ -54,8 +63,11 @@ public class MainActivity extends ActionBarActivity {
     }
 
 
-
-
+    @Override
+    protected void onStart() {
+        super.onStart();
+        doubleBackToExitPressedOnce = false;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -76,9 +88,10 @@ public class MainActivity extends ActionBarActivity {
 
         switch (id) {
             //noinspection SimplifiableIfStatement
-            case R.id.action_settings:
-                SettingsFragment settingsFragment = new SettingsFragment();
-                customFragmentManager.setFragment(R.id.container, settingsFragment, true);
+            case R.id.action_logout:
+                preferenceManager.putBoolean("remembered", false);
+                AuthorisationFragment authorisationFragment = new AuthorisationFragment();
+                customFragmentManager.setFragment(R.id.container, authorisationFragment, false);
                 return true;
 
             case R.id.action_create_new_database:
@@ -101,9 +114,25 @@ public class MainActivity extends ActionBarActivity {
 
         if (fragmentManager.getBackStackEntryCount() > 1) {
             fragmentManager.popBackStack();
+        } else {
+
+            if (doubleBackToExitPressedOnce) {
+                super.onBackPressed();
+                return;
+            }
+
+            this.doubleBackToExitPressedOnce = true;
+            Toast.makeText(this, "Please click BACK again to exit", Toast.LENGTH_SHORT).show();
+
+            new Handler().postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    doubleBackToExitPressedOnce = false;
+                }
+            }, 2000);
+
         }
-
-
 
 
 

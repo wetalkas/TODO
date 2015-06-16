@@ -238,6 +238,10 @@ public class TaskAdapter extends ArrayAdapter<TaskModel> {
 
 
 
+
+
+
+
 }
 
 

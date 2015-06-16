@@ -18,7 +18,9 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -28,6 +30,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -35,10 +38,11 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
-import android.widget.SearchView;
+import android.support.v7.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -175,21 +179,27 @@ public class TasksFragment extends Fragment {
         coordinatorLayout = (CoordinatorLayout) rootView.findViewById(R.id.coordinatorLayout);
 
 
+        /*ViewPager viewPager = (ViewPager) rootView.findViewById(R.id.viewpager);
 
-        //FloatingActionButton floatingActionButton = new FloatingActionButton(activity);
-        CollapsingToolbarLayout.LayoutParams params = new CollapsingToolbarLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        
+
+        TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.tabs);
+
+        //tabLayout.setupWithViewPager(viewPager);
 
 
-        //floatingActionButton.setImageResource(R.drawable.ic_plus_white_24dp);
 
+        tabLayout.canScrollHorizontally(View.SCROLL_AXIS_HORIZONTAL);
 
-        //coordinatorLayout.addView(floatingActionButton);
+        tabLayout.setTabTextColors(getResources().getColor(R.color.abc_primary_text_material_dark),
+                getResources().getColor(R.color.abc_primary_text_material_dark));*/
+
 
 
 
 
         searchView = (SearchView) rootView.findViewById(R.id.searchView);
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -391,9 +401,8 @@ public class TasksFragment extends Fragment {
                 TaskModel taskItem = new TaskModel(etTitle.getText().toString(), etDescription.getText().toString(),
                         dateLong, priority[0], 0, new Date().getTime());
                 addTask(taskItem);
-
-etDate.setEnabled(true);
-                    etTime.setEnabled(true);
+                etDate.setEnabled(true);
+                etTime.setEnabled(true);
             }
 
 
@@ -671,6 +680,7 @@ etDate.setEnabled(true);
                         isDeleted[0] = false;
                     }
                 });
+
 
                 snackbar.getView().addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
                     @Override
