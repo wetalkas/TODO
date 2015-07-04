@@ -69,41 +69,8 @@ public class MainActivity extends ActionBarActivity {
         doubleBackToExitPressedOnce = false;
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
 
 
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-
-        switch (id) {
-            //noinspection SimplifiableIfStatement
-            case R.id.action_logout:
-                preferenceManager.putBoolean("remembered", false);
-                AuthorisationFragment authorisationFragment = new AuthorisationFragment();
-                customFragmentManager.setFragment(R.id.container, authorisationFragment, false);
-                return true;
-
-            case R.id.action_create_new_database:
-                tasksFragment.deleteAllTasksFromDataBase();
-                break;
-
-            case R.id.action_sorting:
-                tasksFragment.showSortingDialog(this);
-                break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
 
     @Override
@@ -138,7 +105,6 @@ public class MainActivity extends ActionBarActivity {
 
 
     }
-
 
     public TasksFragment getTasksFragment() {
         return tasksFragment;

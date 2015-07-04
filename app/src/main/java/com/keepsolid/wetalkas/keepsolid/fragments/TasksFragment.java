@@ -28,6 +28,9 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -48,6 +51,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.keepsolid.wetalkas.keepsolid.activities.MainActivity;
+import com.keepsolid.wetalkas.keepsolid.sdk.CustomFragmentManager;
 import com.keepsolid.wetalkas.keepsolid.todo_sdk.Constants;
 import com.keepsolid.wetalkas.keepsolid.R;
 import com.keepsolid.wetalkas.keepsolid.todo_sdk.adapter.TaskAdapter;
@@ -86,6 +90,7 @@ public class TasksFragment extends Fragment {
 
 
     CustomPreferenceManager preferenceManager;
+    private CustomFragmentManager customFragmentManager;
 
     String currentLogin;
 
@@ -99,9 +104,13 @@ public class TasksFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_tasks, container, false);
 
+        this.setHasOptionsMenu(true);
+
 
 
         preferenceManager = CustomPreferenceManager.getInstance();
+
+        customFragmentManager = CustomFragmentManager.getInstance();
 
         currentLogin = preferenceManager.getString("current_login");
 
@@ -774,4 +783,46 @@ public class TasksFragment extends Fragment {
     public SQLiteDatabase getSqLiteDatabase() {
         return sqLiteDatabase;
     }
+
+
+
+    @Override
+    public void onCreateOptionsMenu (Menu menu, MenuInflater inflater) {
+        Log.i("FragCreateList","onCreateOptionsMenu called");
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_main, menu);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+
+        switch (id) {
+            //noinspection SimplifiableIfStatement
+            case R.id.action_logout:
+                preferenceManager.putBoolean("remembered", false);
+                AuthorisationFragment authorisationFragment = new AuthorisationFragment();
+                customFragmentManager.setFragment(R.id.container, authorisationFragment, false);
+                return true;
+
+            case R.id.action_create_new_database:
+                deleteAllTasksFromDataBase();
+                break;
+
+            case R.id.action_sorting:
+                showSortingDialog(getActivity());
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+
+
+
 }
