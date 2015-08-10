@@ -3,6 +3,8 @@ package com.keepsolid.wetalkas.keepsolid.fragments;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.ContentValues;
@@ -14,6 +16,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -22,6 +25,7 @@ import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -52,9 +56,14 @@ import android.widget.Toast;
 
 import com.keepsolid.wetalkas.keepsolid.activities.MainActivity;
 import com.keepsolid.wetalkas.keepsolid.sdk.CustomFragmentManager;
+import com.keepsolid.wetalkas.keepsolid.sdk.Sdk;
+import com.keepsolid.wetalkas.keepsolid.services.AlarmManagerHelper;
 import com.keepsolid.wetalkas.keepsolid.todo_sdk.Constants;
 import com.keepsolid.wetalkas.keepsolid.R;
+import com.keepsolid.wetalkas.keepsolid.todo_sdk.adapter.TabAdapter;
 import com.keepsolid.wetalkas.keepsolid.todo_sdk.adapter.TaskAdapter;
+import com.keepsolid.wetalkas.keepsolid.todo_sdk.model.Item;
+import com.keepsolid.wetalkas.keepsolid.todo_sdk.model.SectionModel;
 import com.keepsolid.wetalkas.keepsolid.todo_sdk.model.TaskModel;
 import com.keepsolid.wetalkas.keepsolid.sdk.CustomPreferenceManager;
 import com.keepsolid.wetalkas.keepsolid.sdk.CustomSQLiteHelper;
@@ -124,7 +133,7 @@ public class TasksFragment extends Fragment {
 
         setUI(rootView);
 
-        customSQLiteHelper = new CustomSQLiteHelper(getActivity(), "mydatabase.db", null, 1);
+        customSQLiteHelper = CustomSQLiteHelper.getInstance(getActivity().getApplicationContext());
 
         sqLiteDatabase = customSQLiteHelper.getWritableDatabase();
 
@@ -133,21 +142,25 @@ public class TasksFragment extends Fragment {
 
         taskAdapter = new TaskAdapter(getActivity());
 
-        taskAdapter.setDataBase(sqLiteDatabase);
+
 
         lvTasks.setDivider(new ColorDrawable(activity.getResources().getColor(R.color.white_12)));   //0xAARRGGBB
         lvTasks.setDividerHeight(1);
 
+        //lvTasks.setItemsCanFocus(true);
+
         lvTasks.setAdapter(taskAdapter);
 
         lvTasks.setOnItemLongClickListener(longClickListener);
+
+        lvTasks.setOnItemClickListener(itemClickListener);
 
 
         String order = preferenceManager.getString("order");
 
 
 
-        List<TaskModel> tasks = restoreTasks(order);
+        List<Item> tasks = restoreTasks(order);
         taskAdapter.addTask(tasks);
         taskAdapter.notifyDataSetChanged();
 
@@ -171,21 +184,14 @@ public class TasksFragment extends Fragment {
             }
         });
 
-        Toolbar toolbar = (Toolbar)rootView.findViewById(R.id.toolbar);
-        if (toolbar != null) {
-            Log.d("toolbar", "not null");
-            toolbar.setTitle("TODO");
-            toolbar.setTitleTextColor(getResources().getColor(R.color.abc_primary_text_material_dark));
-            ((ActionBarActivity)getActivity()).setSupportActionBar(toolbar);
 
-            //toolbar.setNavigationIcon(getResources().getDrawable(R.drawable.ic_dots_vertical_white_24dp));
-        }
 
 
         view = rootView;
 
 
         coordinatorLayout = (CoordinatorLayout) rootView.findViewById(R.id.coordinatorLayout);
+
 
 
         /*ViewPager viewPager = (ViewPager) rootView.findViewById(R.id.viewpager);
@@ -207,7 +213,7 @@ public class TasksFragment extends Fragment {
 
 
 
-        searchView = (SearchView) rootView.findViewById(R.id.searchView);
+        /*searchView = (SearchView) rootView.findViewById(R.id.searchView);
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -218,37 +224,35 @@ public class TasksFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                List<TaskModel> tasks;
+                List<Item> items;
 
                 if (newText.equals("")) {
                     taskAdapter.deleteAll();
-                    tasks = restoreTasks(null);
+                    items = restoreTasks(null);
 
                 } else {
                     taskAdapter.deleteAll();
-                    tasks = findTasks(newText);
+                    items = findTasks(newText);
                 }
 
-                taskAdapter.addTask(tasks);
+                taskAdapter.addTask(items);
                 taskAdapter.notifyDataSetChanged();
 
                 return false;
             }
-        });
+        });*/
+
+
+
 
     }
 
 
 
+    private void changeTaskDialog(Context context, final TaskModel taskModel) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
-
-    private void addTaskDialog(Context context) {
-        final AlertDialog.Builder alert = new AlertDialog.Builder(context);
-
-
-        alert.setTitle("Adding task");
-
-
+        builder.setTitle("Changing task");
 
         ScrollView container = (ScrollView) getActivity().getLayoutInflater().inflate(R.layout.dialog_add_new_task, null);
 
@@ -268,18 +272,40 @@ public class TasksFragment extends Fragment {
 
         final Spinner spPriority = (Spinner) container.findViewById(R.id.spDialogAddTaskPriority);
 
-        final long[] priority = {0};
+
+
+
 
 
 
         tilTitle.setHint("Title");
+
         tilDescription.setHint("Description");
         tilDate.setHint("Date");
         tilTime.setHint("Time");
 
+        etTitle.setText(taskModel.getName());
+        etDescription.setText(taskModel.getDescription());
 
-        etDate.setEnabled(false);
-        etTime.setEnabled(false);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yy");
+        etDate.setText(dateFormat.format(taskModel.getDate()));
+
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
+        etTime.setText(timeFormat.format(taskModel.getDate()));
+
+        if (etDate.getText() == null) {
+            etDate.setEnabled(false);
+        } else {
+            cbAddTaskRemind.setChecked(true);
+        }
+        if (etTime.getText() == null) {
+            etTime.setEnabled(false);
+        } else {
+            cbAddTaskRemind.setChecked(true);
+        }
+
+
+
 
         cbAddTaskRemind.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -321,30 +347,21 @@ public class TasksFragment extends Fragment {
             }
         });
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item,
+        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item,
                 Constants.PRIORITY_LEVELS);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
+
+
         spPriority.setAdapter(adapter);
+
+        spPriority.setSelection(3 - (int) taskModel.getPriority());
 
         spPriority.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                switch (position) {
-                    case 0:
-                        priority[0] = 3;
-                        break;
-                    case 1:
-                        priority[0] = 2;
-                        break;
-                    case 2:
-                        priority[0] = 1;
-                        break;
-                    case 3:
-                        priority[0] = 0;
-                        break;
-                }
+                taskModel.setPriority(3  - position);
 
             }
 
@@ -357,8 +374,220 @@ public class TasksFragment extends Fragment {
 
 
 
-        alert.setView(container);
+        builder.setView(container);
 
+
+
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yy HH:mm");
+
+                String date = etDate.getText().toString();
+                String time = etTime.getText().toString();
+
+                String dateFullString = date + " " + time;
+
+                Date dateFull = null;
+
+                long dateLong = 0;
+
+
+                if (!dateFullString.equals(" ")) {
+                    try {
+
+                        dateFull = dateFormat.parse(dateFullString);
+                        dateLong = dateFull.getTime();
+
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                long timeStamp = new Date().getTime();
+
+
+
+                if (cbAddTaskRemind.isChecked() && dateFull != null) {
+
+                    AlarmManagerHelper alarmManagerHelper = AlarmManagerHelper.getInstance();
+
+                    alarmManagerHelper.setNotification(etTitle.getText().toString(),
+                            calendar.getTimeInMillis(), timeStamp);
+
+
+
+
+
+
+
+                }
+
+
+
+
+                //addTask(taskItem);
+                taskModel.setName(etTitle.getText().toString());
+                taskModel.setDescription(etDescription.getText().toString());
+                taskModel.setDate(calendar.getTimeInMillis());
+
+                taskModel.setDoneBool(false);
+
+                customSQLiteHelper.updateTask(taskModel);
+
+                taskAdapter.notifyDataSetChanged();
+
+
+                etDate.setEnabled(true);
+                etTime.setEnabled(true);
+            }
+
+
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+
+        final AlertDialog alertDialog = builder.show();
+
+
+
+
+
+        final Button positiveButoon = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+
+        positiveButoon.setEnabled(true);
+
+
+
+        etTitle.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if (s.length() < 1) {
+                    positiveButoon.setEnabled(false);
+
+                } else {
+                    positiveButoon.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (!positiveButoon.isEnabled()) {
+                    tilTitle.setError("Can not be empty.");
+                } else {
+                    tilTitle.setErrorEnabled(false);
+                }
+            }
+        });
+
+
+
+    }
+
+
+    private void addTaskDialog(Context context) {
+        final AlertDialog.Builder alert = new AlertDialog.Builder(context);
+
+
+        alert.setTitle("Adding task");
+
+
+
+        ScrollView container = (ScrollView) getActivity().getLayoutInflater().inflate(R.layout.dialog_add_new_task, null);
+
+        final TextInputLayout tilTitle = (TextInputLayout) container.findViewById(R.id.tilDialogAddTaskName);
+        final EditText etTitle = tilTitle.getEditText();
+
+        final TextInputLayout tilDescription = (TextInputLayout) container.findViewById(R.id.tilDialogAddTaskDescription);
+        final EditText etDescription = tilDescription.getEditText();
+
+        final TextInputLayout tilDate = (TextInputLayout) container.findViewById(R.id.tilDialogAddTaskDate);
+        final EditText etDate = tilDate.getEditText();
+
+        final TextInputLayout tilTime = (TextInputLayout) container.findViewById(R.id.tilDialogAddTaskTime);
+        final EditText etTime = tilTime.getEditText();
+
+        final CheckBox cbAddTaskRemind = (CheckBox) container.findViewById(R.id.cbAddTaskRemind);
+
+        final Spinner spPriority = (Spinner) container.findViewById(R.id.spDialogAddTaskPriority);
+
+        final long[] priority = {0};
+
+
+
+        tilTitle.setHint("Title");
+        tilDescription.setHint("Description");
+        tilDate.setHint("Date");
+        tilTime.setHint("Time");
+
+
+        etDate.setEnabled(false);
+        etTime.setEnabled(false);
+
+
+        cbAddTaskRemind.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b) {
+                    etDate.setEnabled(true);
+                    etTime.setEnabled(true);
+                } else {
+                    etDate.setEnabled(false);
+                    etTime.setEnabled(false);
+
+                    etDate.setText(null);
+                    etTime.setText(null);
+                }
+            }
+        });
+
+
+        etDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDatePickerDialog(getActivity(), etDate);
+            }
+        });
+
+        etTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showTimePickerDialog(getActivity(), etTime);
+            }
+        });
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item,
+                Constants.PRIORITY_LEVELS);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        spPriority.setAdapter(adapter);
+
+        spPriority.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                priority[0] = 3  - position;
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+
+        alert.setView(container);
 
 
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -389,26 +618,28 @@ public class TasksFragment extends Fragment {
                     }
                 }
 
+                long timeStamp = new Date().getTime();
+
 
                 if (cbAddTaskRemind.isChecked() && dateFull != null) {
-                    Intent intent = new Intent(getActivity(),
-                            TaskReminderService.class);
 
-                    intent.putExtra("task_title", etTitle.getText().toString());
+                    AlarmManagerHelper alarmManagerHelper = AlarmManagerHelper.getInstance();
 
-                    PendingIntent pendingIntent = PendingIntent.getService(getActivity(), 0,
-                            intent, 0);
+                    alarmManagerHelper.setNotification(etTitle.getText().toString(),
+                            calendar.getTimeInMillis(), timeStamp);
 
-                    AlarmManager manager = (AlarmManager) getActivity().getSystemService(
-                            Context.ALARM_SERVICE);
 
-                    manager.set(AlarmManager.RTC, dateFull.getTime(), pendingIntent);
+
+
+
+
+
                 }
 
 
 
                 TaskModel taskItem = new TaskModel(etTitle.getText().toString(), etDescription.getText().toString(),
-                        dateLong, priority[0], 0, new Date().getTime());
+                        calendar.getTimeInMillis(), priority[0], 1, timeStamp);
                 addTask(taskItem);
                 etDate.setEnabled(true);
                 etTime.setEnabled(true);
@@ -495,6 +726,8 @@ public class TasksFragment extends Fragment {
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                 calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
                 calendar.set(Calendar.MINUTE, minute);
+                calendar.set(Calendar.SECOND, 0);
+                calendar.set(Calendar.MILLISECOND, 0);
                 SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
                 etTime.setText(timeFormat.format(calendar.getTime()));
             }
@@ -526,37 +759,37 @@ public class TasksFragment extends Fragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
-                List<TaskModel> tasks = new ArrayList<TaskModel>();
+                List<Item> items = new ArrayList<>();
                 String order = null;
                 switch (which) {
                     case 0:
                         taskAdapter.deleteAll();
                         order = CustomSQLiteHelper.TASK_DATE_COLUMN;
-                        tasks = restoreTasks(order);
+                        items = restoreTasks(order);
                         break;
                     case 1:
                         taskAdapter.deleteAll();
                         order = CustomSQLiteHelper.TASK_NAME_COLUMN;
-                        tasks = restoreTasks(order);
+                        items = restoreTasks(order);
                         break;
 
                     case 2:
                         taskAdapter.deleteAll();
                         order = CustomSQLiteHelper.TASK_PRIORITY_COLUMN;
-                        tasks = restoreTasks(order);
+                        items = restoreTasks(order);
                         break;
 
 
                     case 3:
                         taskAdapter.deleteAll();
                         order = CustomSQLiteHelper.TASK_STATUS_COLUMN;
-                        tasks = restoreTasks(order);
+                        items = restoreTasks(order);
                         break;
                 }
 
-                if (!tasks.isEmpty()) {
+                if (!items.isEmpty()) {
                     preferenceManager.putString("order", order);
-                    taskAdapter.addTask(tasks);
+                    //taskAdapter.addTask(tasks);
                     taskAdapter.notifyDataSetChanged();
                 }
 
@@ -569,50 +802,73 @@ public class TasksFragment extends Fragment {
 
 
 
-    private void addTask(TaskModel taskItem) {
+    private void addTask(Item item) {
 
-        List<TaskModel> list = new ArrayList<>();
 
-        list.add(taskItem);
 
-        taskAdapter.addTask(list);
+        //list.add(item);
+
+        //taskAdapter.addTask(list);
+
+
+
+
 
         ContentValues newValues = new ContentValues();
         // Задайте значения для каждой строки.
 
-        newValues.put(CustomSQLiteHelper.USER_LOGIN_COLUMN, currentLogin);
-        newValues.put(CustomSQLiteHelper.TASK_NAME_COLUMN, taskItem.name);
-        newValues.put(CustomSQLiteHelper.TASK_DESCRIPTION_COLUMN, taskItem.description);
-        newValues.put(CustomSQLiteHelper.TASK_DATE_COLUMN, taskItem.date);
-        newValues.put(CustomSQLiteHelper.TASK_STATUS_COLUMN, taskItem.done);
-        newValues.put(CustomSQLiteHelper.TASK_PRIORITY_COLUMN, taskItem.priority);
+        if (item.isSection()) {
 
-        newValues.put(CustomSQLiteHelper.TASK_TIME_COLUMN, taskItem.timeStamp);
-        // Вставляем данные в базу
-        long rowID = sqLiteDatabase.insert("tasks", null, newValues);
+        } else {
 
-        Log.d("rowID", " " + rowID);
+            TaskModel taskModel = (TaskModel) item;
 
-        //preferenceManager.putTaskModel(taskAdapter.getAllTasks());
+            newValues.put(CustomSQLiteHelper.USER_LOGIN_COLUMN, currentLogin);
+            newValues.put(CustomSQLiteHelper.TASK_NAME_COLUMN, taskModel.getName());
+            newValues.put(CustomSQLiteHelper.TASK_DESCRIPTION_COLUMN, taskModel.getDescription());
+            newValues.put(CustomSQLiteHelper.TASK_DATE_COLUMN, taskModel.getDate());
+            newValues.put(CustomSQLiteHelper.TASK_STATUS_COLUMN, taskModel.getDone());
+            newValues.put(CustomSQLiteHelper.TASK_PRIORITY_COLUMN, taskModel.getPriority());
 
+            newValues.put(CustomSQLiteHelper.TASK_TIME_COLUMN, taskModel.getTimeStamp());
+            // Вставляем данные в базу
+            long rowID = sqLiteDatabase.insert(CustomSQLiteHelper.DATABASE_TABLE, null, newValues);
+
+            Log.d("rowID", " " + rowID);
+
+            //preferenceManager.putTaskModel(taskAdapter.getAllTasks());
+        }
+
+
+        taskAdapter.deleteAll();
+
+
+        taskAdapter.addTask(restoreTasks(null));
         taskAdapter.notifyDataSetChanged();
+
+
     }
 
 
 
-    public List<TaskModel> restoreTasks(String orderBy) {
-        List<TaskModel> tasks = new ArrayList<>();
+    public List<Item> restoreTasks(String orderBy) {
+        List<Item> items = new ArrayList<>();
 
 
 
         String selection = CustomSQLiteHelper.USER_LOGIN_COLUMN + " = ?";
         String[] selectionArgs = new String[] {currentLogin};
 
-        Cursor c = sqLiteDatabase.query("tasks", null, selection, selectionArgs, null, null, orderBy);
+        Cursor c = sqLiteDatabase.query(CustomSQLiteHelper.DATABASE_TABLE, null, selection,
+                selectionArgs, null, null, CustomSQLiteHelper.TASK_DATE_COLUMN);
+
+        int sectionStatus = -1;
 
         if (c.moveToFirst()) {
 
             do {
+
+                boolean needSection = true;
 
                 String taskName = c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_NAME_COLUMN));
                 String taskDescr = c.getString(c.getColumnIndex(CustomSQLiteHelper.TASK_DESCRIPTION_COLUMN));
@@ -621,9 +877,49 @@ public class TasksFragment extends Fragment {
                 long taskStatus = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_STATUS_COLUMN));
                 long timeStamp = c.getLong(c.getColumnIndex(CustomSQLiteHelper.TASK_TIME_COLUMN));
 
+
+
+                calendar.setTimeInMillis(taskDate);
+
+                Log.d("task status = ", taskStatus + "");
+
+                if (taskStatus != Constants.STATUS_DONE) {
+
+                    if (calendar.get(Calendar.DAY_OF_YEAR) < Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
+                            && sectionStatus != Constants.STATUS_OVERDUE) {
+                        sectionStatus = Constants.STATUS_OVERDUE;
+                        Log.d("day", "overdue " + calendar.get(Calendar.DAY_OF_YEAR) + " " + Calendar.getInstance().get(Calendar.DAY_OF_YEAR));
+
+                    } else if (calendar.get(Calendar.DAY_OF_YEAR) == Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
+                            && sectionStatus != Constants.STATUS_TODAY) {
+                        sectionStatus = Constants.STATUS_TODAY;
+
+                        Log.d("day", "today " + calendar.get(Calendar.DAY_OF_YEAR) + " " + Calendar.getInstance().get(Calendar.DAY_OF_YEAR));
+
+                    } else if (calendar.get(Calendar.DAY_OF_YEAR) == Calendar.getInstance().get(Calendar.DAY_OF_YEAR) + 1
+                            && sectionStatus != Constants.STATUS_TOMORROW) {
+                        sectionStatus = Constants.STATUS_TOMORROW;
+                        Log.d("day", "tomorow " + calendar.get(Calendar.DAY_OF_YEAR) + " " + Calendar.getInstance().get(Calendar.DAY_OF_YEAR));
+
+                    } else if (calendar.get(Calendar.DAY_OF_YEAR) > Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
+                            && sectionStatus != Constants.STATUS_FUTURE) {
+                        sectionStatus = Constants.STATUS_FUTURE;
+                        Log.d("day", "future " + calendar.get(Calendar.DAY_OF_YEAR) + " " + Calendar.getInstance().get(Calendar.DAY_OF_YEAR));
+                    } else {
+                        needSection = false;
+                        Log.d("day", "wtf "  + calendar.get(Calendar.DAY_OF_YEAR) + " " + Calendar.getInstance().get(Calendar.DAY_OF_YEAR));
+                    }
+                }
+
+                if (needSection) {
+                    SectionModel section = new SectionModel(sectionStatus);
+
+                    items.add(section);
+                }
+
                 TaskModel item = new TaskModel(taskName, taskDescr, taskDate, priority, taskStatus, timeStamp);
 
-                tasks.add(item);
+                items.add(item);
             } while (c.moveToNext());
 
         } else
@@ -632,8 +928,10 @@ public class TasksFragment extends Fragment {
 
 
 
-        return tasks;
+        return items;
     }
+
+
 
 
 
@@ -644,20 +942,27 @@ public class TasksFragment extends Fragment {
 
             Log.d("long", "click");
 
-            removeTaskDialog(getActivity(), position);
+            //removeTaskDialog(getActivity(), position);
+            Item item = taskAdapter.getItem(position);
+
+            if (!item.isSection()) {
+
+                changeTaskDialog(getActivity(), (TaskModel) item);
+            }
 
 
-            return false;
+            return true;
         }
     };
 
 
 
-    private void removeTaskDialog(Context context, final int position) {
+    /*private void removeTaskDialog(Context context, final int position) {
 
         final AlertDialog.Builder alert = new AlertDialog.Builder(context);
 
         alert.setTitle("Remove task");
+
 
         final TaskModel deletingTask = taskAdapter.getTask(position);
         final boolean[] isDeleted = {false};
@@ -703,8 +1008,9 @@ public class TasksFragment extends Fragment {
 
                         if (isDeleted[0]) {
 
-                            long count = sqLiteDatabase.delete("tasks", CustomSQLiteHelper.TASK_TIME_COLUMN
-                                    + " = " + deletingTask.timeStamp, null);
+                            long count = sqLiteDatabase.delete(CustomSQLiteHelper.DATABASE_TABLE,
+                                    CustomSQLiteHelper.TASK_TIME_COLUMN
+                                    + " = " + deletingTask.getTimeStamp(), null);
 
                             Log.d("deleting tasks from db", "count = " + count);
                         }
@@ -725,13 +1031,13 @@ public class TasksFragment extends Fragment {
 
         alert.show();
 
-    }
+    }*/
 
 
 
 
-    public List<TaskModel> findTasks(String key) {
-        List<TaskModel> tasks = new ArrayList<>();
+    public List<Item> findTasks(String key) {
+        List<Item> tasks = new ArrayList<>();
 
 
 
@@ -740,7 +1046,8 @@ public class TasksFragment extends Fragment {
         String[] selectionArgs = new String[] {"%" + key + "%", currentLogin};
 
 
-        Cursor c = sqLiteDatabase.query("tasks", null, selection, selectionArgs, null, null, null);
+        Cursor c = sqLiteDatabase.query(CustomSQLiteHelper.DATABASE_TABLE, null, selection,
+                selectionArgs, null, null, null);
 
 
 
@@ -783,6 +1090,25 @@ public class TasksFragment extends Fragment {
     public SQLiteDatabase getSqLiteDatabase() {
         return sqLiteDatabase;
     }
+
+
+
+    AdapterView.OnItemClickListener itemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            Log.d("onitemClickListener", "running");
+            Item item = taskAdapter.getItem(position);
+
+            if (!item.isSection()) {
+
+
+                changeTaskDialog(getActivity(), (TaskModel) item);
+            }
+        }
+
+    };
+
 
 
 

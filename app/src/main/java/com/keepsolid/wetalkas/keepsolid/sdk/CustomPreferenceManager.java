@@ -21,6 +21,9 @@ public class CustomPreferenceManager {
 
 
 
+
+
+
     public static CustomPreferenceManager getInstance() {
 
         if (instance == null) {

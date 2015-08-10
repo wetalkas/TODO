@@ -19,8 +19,7 @@
         </activity>
         <service
             android:name=".services.TaskReminderService"
-            android:enabled="true"
-            android:exported="true">
+            android:enabled="true">
         </service>
     </application>
 

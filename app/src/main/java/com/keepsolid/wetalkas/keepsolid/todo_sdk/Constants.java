@@ -20,4 +20,12 @@ public class Constants {
 
 
 
+    public static final int STATUS_DONE = 0;
+    public static final int STATUS_OVERDUE = 1;
+    public static final int STATUS_TODAY = 2;
+    public static final int STATUS_TOMORROW = 3;
+    public static final int STATUS_FUTURE = 4;
+
+
+
 }

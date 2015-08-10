@@ -36,7 +36,7 @@ public class SplashFragment extends Fragment {
         // Inflate the layout for this fragment
         AsyncTaskCustom asyncTaskCustom = new AsyncTaskCustom();
 
-        asyncTaskCustom.execute();
+        //asyncTaskCustom.execute();
 
         preferenceManager = CustomPreferenceManager.getInstance();
 

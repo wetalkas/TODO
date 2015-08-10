@@ -4,10 +4,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/gray_50"
-    android:clickable="true"
-    android:longClickable="true">
+    android:layout_height="72dp"
+    android:background="@color/gray_50">
         <TextView
             android:layout_width="160dp"
             android:layout_height="19dp"
@@ -18,7 +16,7 @@
             android:layout_marginTop="16dp"
             android:layout_toLeftOf="@+id/tvTaskDate"
             android:layout_alignLeft="@+id/tvTaskDescription"
-            android:layout_alignStart="@+id/tvTaskDescription" />
+            android:layout_alignStart="@+id/tvTaskDescription"/>
 
         <TextView
             android:layout_width="match_parent"
@@ -32,7 +30,9 @@
 
             android:layout_marginRight="16dp"
             android:layout_marginLeft="72dp"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp"/>
+
+
 
         <TextView
             android:layout_width="wrap_content"
@@ -48,19 +48,20 @@
             android:layout_marginLeft="16dp"
             android:layout_marginTop="19dp"
             android:layout_marginRight="16dp"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp"/>
+
+
+
 
 
 
     <de.hdodenhof.circleimageview.CircleImageView
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/ivTaskPriority"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:src="@color/colorPrimary"
         android:layout_marginLeft="16dp"
-        android:layout_marginTop="16dp"
-        android:clickable="true" />
+        android:layout_marginTop="16dp"/>
 
 
 </RelativeLayout>

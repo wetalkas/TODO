@@ -1,6 +1,10 @@
 package com.keepsolid.wetalkas.keepsolid.sdk;
 
 import android.content.Context;
+import android.util.Log;
+
+import com.keepsolid.wetalkas.keepsolid.R;
+import com.keepsolid.wetalkas.keepsolid.todo_sdk.Constants;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -49,6 +53,34 @@ public class Sdk {
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yy HH:mm", currentLocale); // the format of your date
         //sdf.setTimeZone(TimeZone.getTimeZone("GMT-4")); // give a timezone reference for formating (see comment at the bottom
         return sdf.format(initialDate);
+    }
+
+
+
+    public static String getSeparatorName(int type, Context context) {
+        String name = "";
+
+        switch (type) {
+            case Constants.STATUS_OVERDUE:
+                name = context.getString(R.string.separator_overdue);
+                Log.d("case day", "overdue");
+                break;
+            case Constants.STATUS_TODAY:
+                name = context.getString(R.string.separator_today);
+                Log.d("case day", "today");
+                break;
+            case Constants.STATUS_TOMORROW:
+                name = context.getString(R.string.separator_tomorrow);
+                Log.d("case day", "tomorrow");
+                break;
+            case Constants.STATUS_FUTURE:
+                name = context.getString(R.string.separator_future);
+                Log.d("case day", "future");
+                break;
+        }
+
+
+        return name;
     }
 
 

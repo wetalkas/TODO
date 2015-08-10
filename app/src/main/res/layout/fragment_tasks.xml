@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/coordinatorLayout"
-    android:background="@color/gray_50">
+    android:background="@color/gray_50"
+    >
 
 
 
@@ -19,19 +20,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/lvTasks"
-            android:longClickable="true"
-            android:layout_below="@+id/toolbar"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:paddingBottom="88dp"
             android:clipToPadding="false"
-            android:layout_alignParentEnd="false" />
+            android:layout_alignParentEnd="false"
+            android:drawSelectorOnTop="true"/>
 
 
-        <include
-            android:id="@+id/toolbar"
-            layout="@layout/toolbar">
-        </include>
+
 
 
 
@@ -49,6 +46,7 @@
         android:layout_gravity="bottom|right"
         android:id="@+id/fab"
         android:layout_margin="16dp"
+
         android:src="@drawable/ic_plus_white_24dp"
         app:layout_anchor="@id/lvTasks"
         app:layout_anchorGravity="bottom|right|end" />

@@ -32,4 +32,11 @@
     <string name="menu_sorting">Sorting</string>
     <string name="splash_todo">TODO</string>
     <string name="logout">Logout</string>
+
+
+    <string name="separator_overdue">Overdue</string>
+    <string name="separator_today">Today</string>
+    <string name="separator_tomorrow">Tomorrow</string>
+    <string name="separator_future">Future</string>
+
 </resources>
